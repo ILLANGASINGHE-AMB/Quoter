@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import MessageComposer from './components/MessageComposer';
 import MessageFeed from './components/MessageFeed';
 import AboutModal from './components/AboutModal';
-import { ShieldAlert, MessageSquareCode, Sparkles, Loader2 } from 'lucide-react';
+import { ShieldAlert, Loader2 } from 'lucide-react';
+import logo from './assets/logo.png';
 
 export default function App() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -44,10 +45,7 @@ export default function App() {
         
         {/* Header (Inspired by traditional newsprint/letterpress title plates) */}
         <header className="flex flex-col items-center text-center gap-2 border-b-2 border-[#3c332f] pb-6">
-          <div className="flex items-center gap-2 text-[#b24c32]">
-            <MessageSquareCode className="h-7 w-7 shrink-0" />
-            <Sparkles className="h-5 w-5 shrink-0" />
-          </div>
+          <img src={logo} alt="නිර්නාම Logo" className="h-12 w-auto object-contain mb-2" />
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight font-serif text-[#2a2421]">
             නිර්නාම
           </h1>
