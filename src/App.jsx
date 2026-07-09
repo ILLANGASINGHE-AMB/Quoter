@@ -45,7 +45,7 @@ export default function App() {
         
         {/* Header (Inspired by traditional newsprint/letterpress title plates) */}
         <header className="flex flex-col items-center text-center gap-2 border-b-2 border-[#3c332f] pb-6">
-          <img src={logo} alt="නිර්නාම Logo" className="h-12 w-auto object-contain mb-2" />
+          <img src={logo} alt="නිර්නාම Logo" className="h-24 md:h-32 w-auto object-contain mb-2" />
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight font-serif text-[#2a2421]">
             නිර්නාම
           </h1>
