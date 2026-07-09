@@ -1,4 +1,4 @@
-# ත(ව)නිවෙන්න — Anonymous Sinhala Message Board
+# නිර්නාම — Anonymous Sinhala Message Board
 
 A premium, fully anonymous, open-access web application where anyone can post and reply in Sinhala/English. Features a sleek, modern glassmorphic dark mode, real-time message feeds, and grapheme-aware character counting tailored for complex Sinhala script conjuncts.
 

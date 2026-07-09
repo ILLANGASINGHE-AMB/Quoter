@@ -49,7 +49,7 @@ export default function App() {
             <Sparkles className="h-5 w-5 shrink-0" />
           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight font-serif text-[#2a2421]">
-            ත(ව)නිවෙන්න
+            නිර්නාම
           </h1>
           <p className="text-[#665345] text-sm md:text-base italic font-serif mt-1">
             අදහස් සහ සිතුවිලි නිදහසේ බෙදාගන්න
