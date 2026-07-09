@@ -127,7 +127,7 @@ export default function MessageComposer({ onMessagePosted }) {
           {/* Typewriter Styled Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting || !content.trim() || isOverLimit}
+            disabled={isSubmitting || !content.trim()}
             className="flex items-center space-x-2 px-5 py-2.5 rounded-lg font-medium text-white transition-all bg-[#b24c32] hover:bg-[#963b23] border border-[#2a2421] disabled:opacity-40 disabled:pointer-events-none shadow-[2px_2px_0px_#2a2421] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#2a2421] duration-100"
           >
             {isSubmitting ? (

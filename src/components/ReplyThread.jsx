@@ -207,7 +207,7 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
 
           <button
             type="submit"
-            disabled={isSubmitting || !content.trim() || isOverLimit}
+            disabled={isSubmitting || !content.trim()}
             className="flex items-center space-x-1 px-4 py-1.5 rounded-lg text-xs font-medium text-white transition-all bg-[#b24c32] hover:bg-[#963b23] border border-[#2a2421] disabled:opacity-40 disabled:pointer-events-none shadow-[1.5px_1.5px_0px_#2a2421] active:translate-y-[0.5px] active:shadow-[1px_1px_0px_#2a2421] duration-100"
           >
             <span className="font-sans">පිළිතුරු දෙන්න</span>
