@@ -182,7 +182,10 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
         <div className="relative">
           <textarea
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e) => {
+              setContent(e.target.value);
+              if (error) setError('');
+            }}
             disabled={isSubmitting}
             placeholder="පිළිතුර මෙහි ලියන්න... (Write your reply here...)"
             rows={2}

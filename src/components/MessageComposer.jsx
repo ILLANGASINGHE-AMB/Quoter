@@ -96,7 +96,10 @@ export default function MessageComposer({ onMessagePosted }) {
         <div className="relative">
           <textarea
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e) => {
+              setContent(e.target.value);
+              if (error) setError('');
+            }}
             disabled={isSubmitting}
             placeholder="ඔබේ පණිවිඩය මෙහි ලියන්න... (Type your message here...)"
             rows={4}

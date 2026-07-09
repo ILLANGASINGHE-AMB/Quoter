@@ -4,7 +4,7 @@ create extension if not exists "pgcrypto";
 -- Top-level messages table
 create table if not exists messages (
   id uuid primary key default gen_random_uuid(),
-  content varchar(350) not null,
+  content varchar(1500) not null,
   created_at timestamptz not null default now()
 );
 
@@ -12,7 +12,7 @@ create table if not exists messages (
 create table if not exists replies (
   id uuid primary key default gen_random_uuid(),
   message_id uuid not null references messages(id) on delete cascade,
-  content varchar(350) not null,
+  content varchar(1500) not null,
   created_at timestamptz not null default now()
 );
 
@@ -37,12 +37,12 @@ create policy "public read messages" on messages
 create policy "public read replies" on replies
   for select using (true);
 
--- RLS: Anyone can insert messages and replies (limit content length 1-350)
+-- RLS: Anyone can insert messages and replies (limit content length 1-1500 code points to cover combining Sinhala characters)
 create policy "public insert messages" on messages
-  for insert with check (char_length(content) <= 350 and char_length(content) > 0);
+  for insert with check (char_length(content) <= 1500 and char_length(content) > 0);
 
 create policy "public insert replies" on replies
-  for insert with check (char_length(content) <= 350 and char_length(content) > 0);
+  for insert with check (char_length(content) <= 1500 and char_length(content) > 0);
 
 -- Enable Realtime for the tables to allow clients to listen to insertions
 -- First check if publication exists, then add tables
