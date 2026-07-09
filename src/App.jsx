@@ -37,15 +37,7 @@ export default function App() {
             </p>
           </div>
 
-          <div>
-            <button
-              onClick={() => setIsAboutOpen(true)}
-              className="flex items-center space-x-1.5 px-4 py-2 rounded-xl text-sm font-medium text-slate-200 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all active:scale-95 duration-200"
-            >
-              <Info className="h-4 w-4 text-violet-400" />
-              <span>නීති / Info</span>
-            </button>
-          </div>
+
         </header>
 
         {/* Info Box */}
@@ -78,7 +70,7 @@ export default function App() {
       {/* Footer */}
       <footer className="w-full text-center py-6 border-t border-white/5 text-slate-500 text-xs mt-12 bg-slate-950/40 backdrop-blur-md z-10 px-4">
         <div className="max-w-3xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
-          <p>© {new Date().getFullYear()} Anonymous Sinhala Message Board. Built with React & Supabase.</p>
+          <p>© {new Date().getFullYear()} Anonymous Sinhala Message Board.</p>
           <p className="hover:text-slate-400 transition-colors cursor-pointer" onClick={() => setIsAboutOpen(true)}>
             නිර්නාමිකභාවය සහ නීති රීති (Rules & Privacy)
           </p>
