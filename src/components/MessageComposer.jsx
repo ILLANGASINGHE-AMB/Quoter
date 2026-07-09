@@ -91,10 +91,10 @@ export default function MessageComposer({ onMessagePosted }) {
 
   return (
     <div className="w-full bg-[#fbfbf9] border border-[#3c332f] rounded-xl p-4 md:p-6 shadow-[3px_3px_0px_#2a2421] relative overflow-hidden">
-      {/* Subtle vertical margin line to look like typewriter paper */}
-      <div className="absolute top-0 left-6 w-[1px] h-full bg-[#b24c32]/20 pointer-events-none" />
+      {/* Red vertical margin line positioned clear of the text content */}
+      <div className="absolute top-0 left-8 w-[1px] h-full bg-[#b24c32]/25 pointer-events-none" />
       
-      <form onSubmit={handleSubmit} className="space-y-4 pl-6">
+      <form onSubmit={handleSubmit} className="space-y-4 pl-10 pr-2">
         <div className="relative">
           <textarea
             value={content}
@@ -102,7 +102,7 @@ export default function MessageComposer({ onMessagePosted }) {
             disabled={isSubmitting}
             placeholder="ඔබේ පණිවිඩය මෙහි ලියන්න... (Type your message here...)"
             rows={4}
-            className="w-full bg-[#faf6ee] border border-[#3c332f]/30 rounded-lg px-4 py-3 text-[#2a2421] placeholder-[#887465]/70 focus:outline-none focus:ring-1 focus:ring-[#b24c32] focus:border-[#b24c32] transition-all text-base md:text-lg font-sans resize-none min-h-[110px]"
+            className="w-full bg-transparent border-0 border-b border-[#3c332f]/20 rounded-none px-0 py-2 text-[#2a2421] placeholder-[#887465]/50 focus:outline-none focus:ring-0 focus:border-[#b24c32] transition-all text-base md:text-lg font-sans resize-none min-h-[110px]"
           />
         </div>
 
@@ -113,7 +113,7 @@ export default function MessageComposer({ onMessagePosted }) {
           </div>
         )}
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pt-2">
           {/* Classic Typewriter Character Counter */}
           <div className="flex items-center space-x-2 text-xs md:text-sm font-mono text-[#665345]">
             <span className="font-bold text-[#b24c32]">&gt;</span>
