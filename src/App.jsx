@@ -1,16 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MessageComposer from './components/MessageComposer';
 import MessageFeed from './components/MessageFeed';
 import AboutModal from './components/AboutModal';
-import { ShieldAlert, MessageSquareCode, Sparkles } from 'lucide-react';
+import { ShieldAlert, MessageSquareCode, Sparkles, Loader2 } from 'lucide-react';
 
 export default function App() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isLoadingScreen, setIsLoadingScreen] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoadingScreen(false);
+    }, 1500); // 1.5 seconds loading screen
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleMessagePosted = () => {
     setRefreshTrigger((prev) => prev + 1);
   };
+
+  if (isLoadingScreen) {
+    return (
+      <div className="fixed inset-0 bg-[#FAF6EE] flex flex-col items-center justify-center z-50 selection:bg-[#eadcb9]">
+        <div className="flex flex-col items-center space-y-4">
+          <Loader2 className="h-10 w-10 text-[#b24c32] animate-spin" />
+          <p className="text-[#2A2421] font-serif text-lg font-medium tracking-wide animate-pulse">
+            Loading into නිර්නාම ...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen bg-[#FAF6EE] text-[#2A2421] flex flex-col justify-between selection:bg-[#eadcb9] selection:text-[#2A2421]">
