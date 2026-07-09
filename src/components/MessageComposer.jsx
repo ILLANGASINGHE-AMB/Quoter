@@ -103,6 +103,10 @@ export default function MessageComposer({ onMessagePosted }) {
             disabled={isSubmitting}
             placeholder="ඔබේ පණිවිඩය මෙහි ලියන්න... (Type your message here...)"
             rows={4}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck="false"
             className="w-full bg-transparent border-0 border-b border-[#3c332f]/20 rounded-none px-0 py-2 text-[#2a2421] placeholder-[#887465]/50 focus:outline-none focus:ring-0 focus:border-[#b24c32] transition-all text-base md:text-lg font-sans resize-none min-h-[110px]"
           />
         </div>

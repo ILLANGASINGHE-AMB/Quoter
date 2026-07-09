@@ -189,6 +189,10 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
             disabled={isSubmitting}
             placeholder="පිළිතුර මෙහි ලියන්න... (Write your reply here...)"
             rows={2}
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck="false"
             className="w-full bg-[#faf6ee] border border-[#3c332f]/20 rounded-lg px-3 py-2 text-sm text-[#2a2421] placeholder-[#887465]/70 focus:outline-none focus:ring-1 focus:ring-[#b24c32] focus:border-[#b24c32] transition-all resize-none font-sans"
           />
         </div>
