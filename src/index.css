@@ -1,86 +1,95 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", "Noto Sans Sinhala", sans-serif;
-  --font-sinhala: "Noto Sans Sinhala", sans-serif;
+  --font-sans: "Lora", "Noto Serif Sinhala", serif;
+  --font-serif: "Lora", "Noto Serif Sinhala", serif;
+  --font-sinhala: "Noto Serif Sinhala", serif;
   
-  --color-brand-50: #f5f3ff;
-  --color-brand-100: #ede9fe;
-  --color-brand-200: #ddd6fe;
-  --color-brand-300: #c4b5fd;
-  --color-brand-400: #a78bfa;
-  --color-brand-500: #8b5cf6;
-  --color-brand-600: #7c3aed;
-  --color-brand-700: #6d28d9;
-  --color-brand-800: #5b21b6;
-  --color-brand-900: #4c1d95;
-  --color-brand-950: #0f0720;
+  --color-parchment-50: #fbfbf9;
+  --color-parchment-100: #faf6ee;
+  --color-parchment-200: #f5eedf;
+  --color-parchment-300: #eadcb9;
+  --color-ink-950: #1b1614;
+  --color-ink-900: #2a2421;
+  --color-ink-800: #3c332f;
+  --color-ink-500: #665345;
+  --color-ink-400: #887465;
+  --color-terracotta-500: #b24c32;
+  --color-terracotta-600: #963b23;
+  --color-vintage-green: #4a5d4e;
 }
 
-/* Custom scrollbar for modern dark appearance */
+/* Custom scrollbar for vintage paper look */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: #f5eedf;
+  border-left: 1px solid #eadcb9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.3);
+  background: #cbbba0;
+  border: 2px solid #f5eedf;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.6);
+  background: #b2a188;
 }
 
-/* Smooth custom animations */
-@keyframes fadeInUp {
+/* Typewriter carriage return effect */
+@keyframes typewriterReturn {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateX(-15px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0);
   }
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Soft ambient glow spots */
-.glow-spot-indigo {
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.glow-spot-purple {
-  position: absolute;
-  width: 350px;
-  height: 350px;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
+.animate-typewriter-in {
+  animation: typewriterReturn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: #020617; /* bg-slate-950 */
+  background-color: #faf6ee; /* bg-parchment-100 */
+  color: #2a2421; /* text-ink-900 */
   overflow-x: hidden;
 }
 
-/* Enhancing typography settings for Sinhala script */
+/* Print/typewriter typography alignment */
 p, span, h1, h2, h3, h4, button, textarea, input {
   font-family: var(--font-sans);
-  line-height: 1.6;
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+}
+
+/* Vintage input border-focus */
+textarea:focus, input:focus {
+  outline: none;
+  border-color: #b24c32 !important; /* terracotta-500 */
+}
+
+/* Custom typewriter border look */
+.typewriter-border {
+  border: 1px solid #3c332f;
+  box-shadow: 2px 2px 0px #2a2421;
+}
+
+.typewriter-card {
+  background-color: #fbfbf9;
+  border: 1px solid #3c332f;
+  box-shadow: 3px 3px 0px #2a2421;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.typewriter-card:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #2a2421;
 }

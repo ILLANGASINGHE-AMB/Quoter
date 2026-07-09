@@ -16,23 +16,6 @@ function countGraphemes(str) {
   }
 }
 
-// Relative time formatter in Sinhala & English
-function formatRelativeTime(dateString) {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now - date;
-  const diffSec = Math.max(0, Math.floor(diffMs / 1000));
-  const diffMin = Math.floor(diffSec / 60);
-  const diffHr = Math.floor(diffMin / 60);
-  const diffDay = Math.floor(diffHr / 24);
-
-  if (diffSec < 10) return 'දැන් (Just now)';
-  if (diffSec < 60) return `${diffSec}තත්. පෙර (${diffSec}s ago)`;
-  if (diffMin < 60) return `${diffMin}මිණි. පෙර (${diffMin}m ago)`;
-  if (diffHr < 24) return `${diffHr}පැය. පෙර (${diffHr}h ago)`;
-  return `${diffDay}දින. පෙර (${diffDay}d ago)`;
-}
-
 export default function ReplyThread({ messageId, onReplyCountChange }) {
   const [replies, setReplies] = useState([]);
   const [content, setContent] = useState('');
@@ -46,7 +29,6 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
     setGraphemeCount(countGraphemes(content));
   }, [content]);
 
-  // Fetch replies
   const fetchReplies = async () => {
     try {
       const { data, error: dbError } = await supabase
@@ -70,7 +52,6 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
   useEffect(() => {
     fetchReplies();
 
-    // Subscribe to Realtime inserts for replies of this message
     const channel = supabase
       .channel(`replies-for-${messageId}`)
       .on(
@@ -83,7 +64,6 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
         },
         (payload) => {
           setReplies((prev) => {
-            // Check if reply already exists to avoid duplicates
             if (prev.some(r => r.id === payload.new.id)) return prev;
             const updated = [...prev, payload.new];
             if (onReplyCountChange) {
@@ -91,7 +71,6 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
             }
             return updated;
           });
-          // Scroll to bottom on new reply
           setTimeout(() => {
             repliesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
           }, 100);
@@ -104,7 +83,6 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
     };
   }, [messageId]);
 
-  // Soft client-side rate limit for replies
   const checkRateLimit = () => {
     try {
       const now = Date.now();
@@ -164,10 +142,10 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
   const isOverLimit = graphemeCount > 350;
 
   return (
-    <div className="mt-4 border-t border-white/5 pt-4 pl-2 md:pl-6 space-y-4">
+    <div className="mt-4 border-t border-[#3c332f]/10 pt-4 pl-2 md:pl-6 space-y-4 text-left">
       {/* Sub-header icon */}
-      <div className="flex items-center space-x-2 text-slate-500 text-xs font-medium uppercase tracking-wider">
-        <CornerDownRight className="h-4 w-4 shrink-0" />
+      <div className="flex items-center space-x-2 text-[#665345] text-xs font-semibold uppercase tracking-wider font-mono">
+        <CornerDownRight className="h-4 w-4 shrink-0 text-[#b24c32]" />
         <MessageSquareCode className="h-3.5 w-3.5" />
         <span>පිළිතුරු (Replies)</span>
       </div>
@@ -175,23 +153,23 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
       {/* List of Replies */}
       <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1">
         {isLoading ? (
-          <div className="text-center text-slate-500 text-xs py-2">
+          <div className="text-center text-[#665345] text-xs py-2 font-mono">
             පිළිතුරු පූරණය වෙමින් පවතී... (Loading replies...)
           </div>
         ) : replies.length === 0 ? (
-          <div className="text-slate-500 text-xs py-2 italic">
+          <div className="text-[#665345] text-xs py-2 italic font-serif">
             තවමත් පිළිතුරු නොමැත. පළමු පිළිතුර ලියන්න! (No replies yet. Be the first!)
           </div>
         ) : (
           replies.map((reply) => (
             <div 
               key={reply.id} 
-              className="bg-white/5 border border-white/5 rounded-xl p-3 text-slate-200 transition-all duration-200 hover:bg-white/10 animate-fade-in-up"
+              className="bg-[#f5eedf] border border-[#eadcb9] rounded-lg p-3 text-[#2a2421] transition-all duration-200 hover:bg-[#eadcb9]/30 animate-typewriter-in"
             >
-              <p className="text-sm break-words whitespace-pre-wrap">{reply.content}</p>
-              <div className="flex items-center space-x-1 mt-2 text-[10px] text-slate-400 font-mono">
+              <p className="text-sm break-words whitespace-pre-wrap font-serif leading-relaxed">{reply.content}</p>
+              <div className="flex items-center space-x-1 mt-2 text-[10px] text-[#665345] font-mono">
                 <Clock className="h-3 w-3" />
-                <span>{formatRelativeTime(reply.created_at)}</span>
+                <span>{new Date(reply.created_at).toLocaleDateString()}</span>
               </div>
             </div>
           ))
@@ -208,28 +186,28 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
             disabled={isSubmitting}
             placeholder="පිළිතුර මෙහි ලියන්න... (Write your reply here...)"
             rows={2}
-            className="w-full bg-slate-950/70 border border-white/10 rounded-xl px-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-violet-500 focus:border-violet-500 transition-all resize-none"
+            className="w-full bg-[#faf6ee] border border-[#3c332f]/20 rounded-lg px-3 py-2 text-sm text-[#2a2421] placeholder-[#887465]/70 focus:outline-none focus:ring-1 focus:ring-[#b24c32] focus:border-[#b24c32] transition-all resize-none font-sans"
           />
         </div>
 
         {error && (
-          <div className="flex items-center space-x-1.5 text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-1.5 rounded-lg text-xs">
+          <div className="flex items-center space-x-1.5 text-[#b24c32] bg-[#b24c32]/5 border border-[#b24c32]/20 px-2 py-1.5 rounded-md text-xs">
             <AlertCircle className="h-3.5 w-3.5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         <div className="flex items-center justify-between">
-          <span className={`text-xs font-mono ${isOverLimit ? 'text-rose-400 font-semibold' : 'text-slate-500'}`}>
+          <span className={`text-xs font-mono ${isOverLimit ? 'text-[#b24c32] font-semibold' : 'text-[#665345]'}`}>
             {graphemeCount} / 350
           </span>
 
           <button
             type="submit"
             disabled={isSubmitting || !content.trim() || isOverLimit}
-            className="flex items-center space-x-1 px-4 py-1.5 rounded-lg text-xs font-medium text-white transition-all bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 disabled:opacity-40 disabled:pointer-events-none shadow"
+            className="flex items-center space-x-1 px-4 py-1.5 rounded-lg text-xs font-medium text-white transition-all bg-[#b24c32] hover:bg-[#963b23] border border-[#2a2421] disabled:opacity-40 disabled:pointer-events-none shadow-[1.5px_1.5px_0px_#2a2421] active:translate-y-[0.5px] active:shadow-[1px_1px_0px_#2a2421] duration-100"
           >
-            <span>පිළිතුරු දෙන්න</span>
+            <span className="font-sans">පිළිතුරු දෙන්න</span>
             <Send className="h-3 w-3" />
           </button>
         </div>
