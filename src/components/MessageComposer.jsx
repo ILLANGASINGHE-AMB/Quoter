@@ -91,10 +91,8 @@ export default function MessageComposer({ onMessagePosted }) {
 
   return (
     <div className="w-full bg-[#fbfbf9] border border-[#3c332f] rounded-xl p-4 md:p-6 shadow-[3px_3px_0px_#2a2421] relative overflow-hidden">
-      {/* Red vertical margin line positioned clear of the text content */}
-      <div className="absolute top-0 left-8 w-[1px] h-full bg-[#b24c32]/25 pointer-events-none" />
       
-      <form onSubmit={handleSubmit} className="space-y-4 pl-10 pr-2">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="relative">
           <textarea
             value={content}

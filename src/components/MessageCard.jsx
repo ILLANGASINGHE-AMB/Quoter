@@ -50,11 +50,8 @@ export default function MessageCard({ message }) {
   return (
     <div className="w-full bg-[#fbfbf9] border border-[#3c332f] rounded-xl p-5 md:p-6 shadow-[3px_3px_0px_#2a2421] transition-all duration-200 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#2a2421] animate-typewriter-in relative overflow-hidden group">
       
-      {/* Decorative vertical margins line to look like a physical printout */}
-      <div className="absolute top-0 left-6 w-[1px] h-full bg-[#b24c32]/25 pointer-events-none" />
-      
       {/* Content */}
-      <div className="space-y-4 pl-6">
+      <div className="space-y-4">
         <p className="text-[#2a2421] text-base md:text-lg font-serif break-words whitespace-pre-wrap text-left select-all leading-relaxed">
           {message.content}
         </p>
