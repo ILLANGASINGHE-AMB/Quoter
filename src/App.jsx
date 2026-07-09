@@ -55,7 +55,6 @@ export default function App() {
         <section className="space-y-6">
           <div className="flex items-center justify-between border-b border-[#3c332f]/20 pb-2">
             <h2 className="text-lg md:text-xl font-bold font-serif text-[#2a2421]">පණිවිඩ එකතුව (Board Feed)</h2>
-            <span className="text-xs font-mono text-[#665345]">vintage print</span>
           </div>
           
           <MessageFeed refreshTrigger={refreshTrigger} />
