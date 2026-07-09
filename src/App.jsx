@@ -29,11 +29,11 @@ export default function App() {
           <div className="space-y-2">
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent flex items-center gap-2 md:gap-3">
               <MessageSquareCode className="h-8 w-8 text-violet-500 shrink-0" />
-              <span>නිර්නාමික සිංහල පුවරුව</span>
+              <span>ත(ව)නිවෙන්න</span>
             </h1>
             <p className="text-slate-400 text-sm md:text-base font-medium flex items-center gap-1.5">
               <Sparkles className="h-4 w-4 text-violet-400 shrink-0" />
-              <span>අදහස්, උපුටා ගැනීම් සහ සිතුවිලි නිදහසේ බෙදාගන්න</span>
+              <span>අදහස් සහ සිතුවිලි නිදහසේ බෙදාගන්න</span>
             </p>
           </div>
 
