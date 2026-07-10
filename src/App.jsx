@@ -3,12 +3,66 @@ import MessageComposer from './components/MessageComposer';
 import MessageFeed from './components/MessageFeed';
 import AboutModal from './components/AboutModal';
 import { ShieldAlert, Loader2 } from 'lucide-react';
+import { supabase } from './supabaseClient';
 import logo from './assets/logo.png';
 
 export default function App() {
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isLoadingScreen, setIsLoadingScreen] = useState(true);
+  const [currentDate, setCurrentDate] = useState(new Date().toDateString());
+
+  const fetchMessages = async () => {
+    try {
+      const { data, error: dbError } = await supabase
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (dbError) throw dbError;
+      setMessages(data || []);
+      setError('');
+    } catch (err) {
+      console.error('Error fetching messages:', err);
+      setError('පණිවිඩ පූරණය කිරීමට නොහැකි විය. (Failed to load messages.)');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch messages on mount and subscribe to realtime insertions
+  useEffect(() => {
+    fetchMessages();
+
+    const channel = supabase
+      .channel('messages-feed-channel')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          setMessages((prev) => {
+            // Check for duplicates
+            if (prev.some((m) => m.id === payload.new.id)) return prev;
+            return [payload.new, ...prev];
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Update currentDate periodically to reset "Today's Feeds" daily
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentDate(new Date().toDateString());
+    }, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -18,8 +72,14 @@ export default function App() {
   }, []);
 
   const handleMessagePosted = () => {
-    setRefreshTrigger((prev) => prev + 1);
+    fetchMessages();
   };
+
+  const totalFeeds = messages.length;
+  const todaysFeeds = messages.filter((msg) => {
+    const msgDate = new Date(msg.created_at);
+    return msgDate.toDateString() === currentDate;
+  }).length;
 
   if (isLoadingScreen) {
     return (
@@ -72,11 +132,21 @@ export default function App() {
 
         {/* Message Feed Section */}
         <section className="space-y-6">
-          <div className="flex items-center justify-between border-b border-[#3c332f]/20 pb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#3c332f]/20 pb-2 gap-2">
             <h2 className="text-lg md:text-xl font-bold font-serif text-[#2a2421]">පණිවිඩ එකතුව (Board Feed)</h2>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs md:text-sm font-mono">
+              <div className="flex items-center space-x-1.5 bg-[#fbfbf9] px-2.5 py-1 rounded-md border border-[#3c332f] shadow-[2px_2px_0px_#2a2421]">
+                <span className="text-[#665345] font-medium">Total Feeds:</span>
+                <span className="font-bold text-[#2a2421]">{totalFeeds}</span>
+              </div>
+              <div className="flex items-center space-x-1.5 bg-[#fbfbf9] px-2.5 py-1 rounded-md border border-[#3c332f] shadow-[2px_2px_0px_#2a2421]">
+                <span className="text-[#665345] font-medium">Today's Feeds:</span>
+                <span className="font-bold text-[#b24c32]">{todaysFeeds}</span>
+              </div>
+            </div>
           </div>
           
-          <MessageFeed refreshTrigger={refreshTrigger} />
+          <MessageFeed messages={messages} isLoading={isLoading} error={error} fetchMessages={fetchMessages} />
         </section>
       </div>
 

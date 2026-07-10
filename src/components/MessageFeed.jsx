@@ -1,62 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import React from 'react';
 import MessageCard from './MessageCard';
 import { MessageSquare, RefreshCw } from 'lucide-react';
 
-export default function MessageFeed({ refreshTrigger }) {
-  const [messages, setMessages] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  const fetchMessages = async () => {
-    try {
-      const { data, error: dbError } = await supabase
-        .from('messages')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (dbError) throw dbError;
-      setMessages(data || []);
-      setError('');
-    } catch (err) {
-      console.error('Error fetching messages:', err);
-      setError('පණිවිඩ පූරණය කිරීමට නොහැකි විය. (Failed to load messages.)');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fetch messages on mount and when refreshTrigger changes
-  useEffect(() => {
-    fetchMessages();
-  }, [refreshTrigger]);
-
-  // Subscribe to real-time additions to messages table
-  useEffect(() => {
-    const channel = supabase
-      .channel('messages-feed-channel')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages' },
-        (payload) => {
-          setMessages((prev) => {
-            // Check for duplicates
-            if (prev.some((m) => m.id === payload.new.id)) return prev;
-            return [payload.new, ...prev];
-          });
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
+export default function MessageFeed({ messages, isLoading, error, fetchMessages }) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-3">
-        <RefreshCw className="h-8 w-8 text-violet-500 animate-spin" />
+        <RefreshCw className="h-8 w-8 text-[#b24c32] animate-spin" />
         <p className="text-slate-400 text-sm">
           පණිවිඩ පූරණය වෙමින් පවතී... (Loading board...)
         </p>
@@ -70,7 +20,7 @@ export default function MessageFeed({ refreshTrigger }) {
         <p>{error}</p>
         <button 
           onClick={fetchMessages}
-          className="mt-4 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-xs rounded-xl font-medium transition-all"
+          className="mt-4 px-4 py-2 bg-[#b24c32] hover:bg-[#963b23] text-white text-xs rounded-xl font-medium transition-all shadow-[2px_2px_0px_#2a2421] border border-[#2a2421]"
         >
           නැවත උත්සාහ කරන්න (Retry)
         </button>
