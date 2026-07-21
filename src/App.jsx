@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import MessageComposer from './components/MessageComposer';
 import MessageFeed from './components/MessageFeed';
 import AboutModal from './components/AboutModal';
-import { ShieldAlert, Loader2 } from 'lucide-react';
+import { ShieldAlert, Loader2, User, ExternalLink } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import logo from './assets/logo.png';
 
@@ -13,6 +13,19 @@ export default function App() {
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isLoadingScreen, setIsLoadingScreen] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date().toDateString());
+  const [creatorButtonText, setCreatorButtonText] = useState('නිර්මාතෘ හමුවන්න');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && navigator.language) {
+      const userLang = navigator.language.toLowerCase();
+      const docLang = document.documentElement.lang?.toLowerCase();
+      if (userLang.startsWith('en') || docLang === 'en') {
+        setCreatorButtonText('Meet the Creator');
+      } else {
+        setCreatorButtonText('නිර්මාතෘ හමුවන්න');
+      }
+    }
+  }, []);
 
   const fetchMessages = async () => {
     try {
@@ -99,6 +112,20 @@ export default function App() {
       
       {/* Decorative top margin line (reminiscent of letterpress margin guides) */}
       <div className="w-full h-1 bg-[#b24c32] opacity-80" />
+
+      {/* Creator link button (upper right corner) */}
+      <div className="absolute top-4 right-4 md:top-6 md:right-8 z-20">
+        <a
+          href="https://imanjana.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs md:text-sm font-serif font-medium bg-[#fbfbf9] text-[#2a2421] border border-[#3c332f] rounded-lg shadow-[2px_2px_0px_#2a2421] hover:bg-[#b24c32] hover:text-white transition-colors duration-150 active:translate-y-[0.5px] active:shadow-[1px_1px_0px_#2a2421]"
+        >
+          <User className="w-3.5 h-3.5 md:w-4 md:h-4" />
+          <span>{creatorButtonText}</span>
+          <ExternalLink className="w-3 h-3 opacity-70" />
+        </a>
+      </div>
 
       {/* Main Container */}
       <div className="w-full max-w-3xl mx-auto px-4 py-8 md:py-12 z-10 space-y-8 md:space-y-12">
