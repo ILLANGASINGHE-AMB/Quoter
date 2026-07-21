@@ -114,16 +114,16 @@ export default function App() {
       <div className="w-full h-1 bg-[#b24c32] opacity-80" />
 
       {/* Creator link button (upper right corner) */}
-      <div className="absolute top-4 right-4 md:top-6 md:right-8 z-20">
+      <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 md:top-6 md:right-8 z-20">
         <a
           href="https://imanjana.vercel.app/"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs md:text-sm font-serif font-medium bg-[#fbfbf9] text-[#2a2421] border border-[#3c332f] rounded-lg shadow-[2px_2px_0px_#2a2421] hover:bg-[#b24c32] hover:text-white transition-colors duration-150 active:translate-y-[0.5px] active:shadow-[1px_1px_0px_#2a2421]"
+          className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs md:text-sm font-serif font-medium bg-[#fbfbf9] text-[#2a2421] border border-[#3c332f] rounded-md sm:rounded-lg shadow-[1.5px_1.5px_0px_#2a2421] sm:shadow-[2px_2px_0px_#2a2421] hover:bg-[#b24c32] hover:text-white transition-colors duration-150 active:translate-y-[0.5px] active:shadow-[1px_1px_0px_#2a2421]"
         >
-          <User className="w-3.5 h-3.5 md:w-4 md:h-4" />
+          <User className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
           <span>{creatorButtonText}</span>
-          <ExternalLink className="w-3 h-3 opacity-70" />
+          <ExternalLink className="w-2.5 h-2.5 sm:w-3 sm:h-3 opacity-70" />
         </a>
       </div>
 
