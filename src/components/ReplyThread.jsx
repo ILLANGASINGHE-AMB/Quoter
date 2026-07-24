@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../supabaseClient';
 import { Send, AlertCircle, CornerDownRight, MessageSquareCode, Clock } from 'lucide-react';
+import { relativeTime } from '../utils/relativeTime';
 
 // Grapheme-aware counting for Sinhala conjunct characters
 function countGraphemes(str) {
@@ -112,8 +113,8 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
       return;
     }
 
-    if (graphemeCount > 350) {
-      setError('අකුරු සීමාව 350 ඉක්මවා ඇත. (Character limit of 350 exceeded.)');
+    if (graphemeCount > 500) {
+      setError('අකුරු සීමාව 500 ඉක්මවා ඇත. (Character limit of 500 exceeded.)');
       return;
     }
 
@@ -139,7 +140,7 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
     }
   };
 
-  const isOverLimit = graphemeCount > 350;
+  const isOverLimit = graphemeCount > 500;
 
   return (
     <div className="mt-4 border-t border-[#3c332f]/10 pt-4 pl-2 md:pl-6 space-y-4 text-left">
@@ -169,7 +170,7 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
               <p className="text-sm break-words whitespace-pre-wrap font-serif leading-relaxed">{reply.content}</p>
               <div className="flex items-center space-x-1 mt-2 text-[10px] text-[#665345] font-mono">
                 <Clock className="h-3 w-3" />
-                <span>{new Date(reply.created_at).toLocaleDateString()}</span>
+                <span>{relativeTime(reply.created_at)}</span>
               </div>
             </div>
           ))
@@ -206,12 +207,12 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
 
         <div className="flex items-center justify-between">
           <span className={`text-xs font-mono ${isOverLimit ? 'text-[#b24c32] font-semibold' : 'text-[#665345]'}`}>
-            {graphemeCount} / 350
+            {graphemeCount} / 500
           </span>
 
           <button
             type="submit"
-            disabled={isSubmitting || !content.trim()}
+            disabled={isSubmitting || !content.trim() || isOverLimit}
             className="flex items-center space-x-1 px-4 py-1.5 rounded-lg text-xs font-medium text-white transition-all bg-[#b24c32] hover:bg-[#963b23] border border-[#2a2421] disabled:opacity-40 disabled:pointer-events-none shadow-[1.5px_1.5px_0px_#2a2421] active:translate-y-[0.5px] active:shadow-[1px_1px_0px_#2a2421] duration-100"
           >
             <span className="font-sans">පිළිතුරු දෙන්න</span>

@@ -88,5 +88,5 @@ Since the project is structured as a standard single-page app, deploying to Verc
 This application runs entirely serverless and secures backend access via **Row Level Security (RLS)** in PostgreSQL:
 
 - **SELECT (Read)**: Permitted to everyone (`true`) so anyone can load messages and replies.
-- **INSERT (Create)**: Permitted to everyone under the validation constraint `char_length(content) <= 350 and char_length(content) > 0` preventing empty posts or oversize inputs.
+- **INSERT (Create)**: Permitted to everyone under the validation constraint `char_length(content) <= 1500 and char_length(content) > 0` (with a client-side visual constraint of 500 graphemes) preventing empty posts or oversize inputs.
 - **UPDATE & DELETE**: Blocked entirely for public client access. Only administrative credentials (e.g. database owner, dashboard) can delete offending messages, guaranteeing client-side data immutability.

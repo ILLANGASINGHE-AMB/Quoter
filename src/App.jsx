@@ -2,7 +2,12 @@ import React, { useState, useEffect } from 'react';
 import MessageComposer from './components/MessageComposer';
 import MessageFeed from './components/MessageFeed';
 import AboutModal from './components/AboutModal';
-import { ShieldAlert, Loader2, User, ExternalLink } from 'lucide-react';
+import LoadingScreen from './components/LoadingScreen';
+import AnonBanner from './components/AnonBanner';
+import FeedTabs from './components/FeedTabs';
+import FeedHeader from './components/FeedHeader';
+import EmptyState from './components/EmptyState';
+import { User, ExternalLink } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import logo from './assets/logo.png';
 
@@ -14,6 +19,7 @@ export default function App() {
   const [isLoadingScreen, setIsLoadingScreen] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date().toDateString());
   const [creatorButtonText, setCreatorButtonText] = useState('නිර්මාතෘ හමුවන්න');
+  const [activeTab, setActiveTab] = useState('සියල්ල');
 
   useEffect(() => {
     if (typeof window !== 'undefined' && navigator.language) {
@@ -31,7 +37,7 @@ export default function App() {
     try {
       const { data, error: dbError } = await supabase
         .from('messages')
-        .select('*')
+        .select('*, replies(id)')
         .order('created_at', { ascending: false });
 
       if (dbError) throw dbError;
@@ -58,7 +64,9 @@ export default function App() {
           setMessages((prev) => {
             // Check for duplicates
             if (prev.some((m) => m.id === payload.new.id)) return prev;
-            return [payload.new, ...prev];
+            // Initialize replies as empty array for new real-time message
+            const newMsg = { ...payload.new, replies: [] };
+            return [newMsg, ...prev];
           });
         }
       )
@@ -94,17 +102,28 @@ export default function App() {
     return msgDate.toDateString() === currentDate;
   }).length;
 
+  const filteredMessages = messages
+    .filter((msg) => {
+      if (activeTab === 'අද') {
+        const msgDate = new Date(msg.created_at);
+        return msgDate.toDateString() === currentDate;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (activeTab === 'ජනප්‍රිය') {
+        const countA = a.replies ? a.replies.length : 0;
+        const countB = b.replies ? b.replies.length : 0;
+        if (countB === countA) {
+          return new Date(b.created_at) - new Date(a.created_at);
+        }
+        return countB - countA;
+      }
+      return 0; // maintain original created_at desc order from fetch
+    });
+
   if (isLoadingScreen) {
-    return (
-      <div className="fixed inset-0 bg-[#FAF6EE] flex flex-col items-center justify-center z-50 selection:bg-[#eadcb9]">
-        <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="h-10 w-10 text-[#b24c32] animate-spin" />
-          <p className="text-[#2A2421] font-serif text-lg font-medium tracking-wide animate-pulse">
-            Loading into නිර්නාම ...
-          </p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
@@ -141,16 +160,8 @@ export default function App() {
           </p>
         </header>
 
-        {/* Info Box (Styled like a typed warning note pinned to a board) */}
-        <div className="bg-[#f5eedf] border border-[#eadcb9] shadow-[2px_2px_0px_#eadcb9] rounded-xl p-4 flex items-start space-x-3 text-xs md:text-sm text-[#665345]">
-          <ShieldAlert className="h-5 w-5 shrink-0 text-[#b24c32] mt-0.5" />
-          <div className="space-y-1 text-left">
-            <p className="font-bold text-[#2a2421]">නිර්නාමිකයි • සීමාවන් නොමැත</p>
-            <p className="leading-relaxed">
-              මෙහි කිසිදු ලියාපදිංචියක් අවශ්‍ය නොවේ. ඔබ පළ කරන සෑම දෙයක්ම ක්ෂණිකව සහ සම්පූර්ණයෙන්ම නිර්නාමිකව පළ වේ. කරුණාකර පුද්ගලික තොරතුරු ඇතුළත් කිරීමෙන් වළකින්න.
-            </p>
-          </div>
-        </div>
+        {/* Info Box / Banner */}
+        <AnonBanner />
 
         {/* Message Input Section */}
         <section className="space-y-4">
@@ -159,21 +170,26 @@ export default function App() {
 
         {/* Message Feed Section */}
         <section className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#3c332f]/20 pb-2 gap-2">
-            <h2 className="text-lg md:text-xl font-bold font-serif text-[#2a2421]">පණිවිඩ එකතුව (Board Feed)</h2>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs md:text-sm font-mono">
-              <div className="flex items-center space-x-1.5 bg-[#fbfbf9] px-2.5 py-1 rounded-md border border-[#3c332f] shadow-[2px_2px_0px_#2a2421]">
-                <span className="text-[#665345] font-medium">Total Feeds:</span>
-                <span className="font-bold text-[#2a2421]">{totalFeeds}</span>
-              </div>
-              <div className="flex items-center space-x-1.5 bg-[#fbfbf9] px-2.5 py-1 rounded-md border border-[#3c332f] shadow-[2px_2px_0px_#2a2421]">
-                <span className="text-[#665345] font-medium">Today's Feeds:</span>
-                <span className="font-bold text-[#b24c32]">{todaysFeeds}</span>
-              </div>
-            </div>
-          </div>
+          <FeedHeader 
+            onRefresh={fetchMessages} 
+            total={totalFeeds} 
+            todayCount={todaysFeeds} 
+          />
+          <FeedTabs 
+            active={activeTab} 
+            onChange={setActiveTab} 
+          />
           
-          <MessageFeed messages={messages} isLoading={isLoading} error={error} fetchMessages={fetchMessages} />
+          {filteredMessages.length === 0 ? (
+            <EmptyState title={activeTab === 'අද' ? 'අද තවම පණිවිඩ නැත' : 'පණිවිඩ කිසිවක් නැත'} />
+          ) : (
+            <MessageFeed 
+              messages={filteredMessages} 
+              isLoading={isLoading} 
+              error={error} 
+              fetchMessages={fetchMessages} 
+            />
+          )}
         </section>
       </div>
 

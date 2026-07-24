@@ -2,12 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import ReplyThread from './ReplyThread';
 import { MessageCircle, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { relativeTime } from '../utils/relativeTime';
 
 export default function MessageCard({ message }) {
   const [showReplies, setShowReplies] = useState(false);
-  const [replyCount, setReplyCount] = useState(0);
+  const [replyCount, setReplyCount] = useState(
+    message.replies ? message.replies.length : 0
+  );
 
-  // Fetch count on mount
+  // Sync reply count if props update (e.g. on feed refresh)
+  useEffect(() => {
+    if (message.replies) {
+      setReplyCount(message.replies.length);
+    }
+  }, [message.replies]);
+
+  // Fetch count on mount & listen to database changes
   useEffect(() => {
     const fetchReplyCount = async () => {
       try {
@@ -23,7 +33,10 @@ export default function MessageCard({ message }) {
       }
     };
 
-    fetchReplyCount();
+    // If initial fetch from parent select replies count is not present, fetch it
+    if (message.replies === undefined) {
+      fetchReplyCount();
+    }
 
     // Subscribe to realtime changes in the replies table to keep the count updated
     const channel = supabase
@@ -45,10 +58,12 @@ export default function MessageCard({ message }) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [message.id]);
+  }, [message.id, message.replies]);
 
   return (
-    <div className="w-full bg-[#fbfbf9] border border-[#3c332f] rounded-xl p-5 md:p-6 shadow-[3px_3px_0px_#2a2421] transition-all duration-200 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#2a2421] animate-typewriter-in relative overflow-hidden group">
+    <div className={`w-full bg-[#fbfbf9] border border-[#3c332f] rounded-xl p-5 md:p-6 shadow-[3px_3px_0px_#2a2421] transition-all duration-200 hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_#2a2421] animate-typewriter-in relative overflow-hidden group ${
+      replyCount > 0 ? 'border-l-4 border-l-[#b24c32] rounded-l-none' : ''
+    }`}>
       
       {/* Content */}
       <div className="space-y-4">
@@ -60,7 +75,7 @@ export default function MessageCard({ message }) {
         <div className="flex items-center justify-between border-t border-[#3c332f]/10 pt-3 text-xs md:text-sm text-[#665345] font-medium font-mono">
           <div className="flex items-center space-x-1.5">
             <Clock className="h-4 w-4 text-[#887465]" />
-            <span>{new Date(message.created_at).toLocaleDateString()}</span>
+            <span>{relativeTime(message.created_at)}</span>
           </div>
 
           <button

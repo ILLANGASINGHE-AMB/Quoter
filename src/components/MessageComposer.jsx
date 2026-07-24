@@ -56,8 +56,8 @@ export default function MessageComposer({ onMessagePosted }) {
     }
 
     const length = countGraphemes(trimmed);
-    if (length > 350) {
-      setError('අකුරු සීමාව 350 ඉක්මවා ඇත. (Character limit of 350 exceeded.)');
+    if (length > 500) {
+      setError('අකුරු සීමාව 500 ඉක්මවා ඇත. (Character limit of 500 exceeded.)');
       return;
     }
 
@@ -87,7 +87,10 @@ export default function MessageComposer({ onMessagePosted }) {
     }
   };
 
-  const isOverLimit = graphemeCount > 350;
+  const MAX_CHARS = 500;
+  const pct = Math.min((graphemeCount / MAX_CHARS) * 100, 100);
+  const isWarn = pct >= 80 && pct < 100;
+  const isOver = graphemeCount > MAX_CHARS;
 
   return (
     <div className="w-full bg-[#fbfbf9] border border-[#3c332f] rounded-xl p-4 md:p-6 shadow-[3px_3px_0px_#2a2421] relative overflow-hidden">
@@ -119,19 +122,27 @@ export default function MessageComposer({ onMessagePosted }) {
         )}
 
         <div className="flex items-center justify-between pt-2">
-          {/* Classic Typewriter Character Counter */}
-          <div className="flex items-center space-x-2 text-xs md:text-sm font-mono text-[#665345]">
-            <span className="font-bold text-[#b24c32]">&gt;</span>
-            <span>COUNT:</span>
-            <span className={`px-2 py-0.5 rounded border border-[#3c332f]/10 bg-[#faf6ee] ${isOverLimit ? 'text-[#b24c32] font-semibold border-[#b24c32]/20' : 'text-[#2a2421]'}`}>
-              {graphemeCount} / 350
+          {/* Polished Character Counter with Progress Bar */}
+          <div className="flex items-center space-x-3 select-none">
+            <div className="w-14 h-1 bg-[#eadcb9] rounded-full overflow-hidden">
+              <div 
+                className={`h-full rounded-full transition-all duration-150 ${
+                  isOver ? 'bg-[#b24c32]' : isWarn ? 'bg-[#d97706]' : 'bg-[#665345]'
+                }`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <span className={`text-xs font-mono transition-colors ${
+              isOver ? 'text-[#b24c32] font-semibold' : isWarn ? 'text-[#d97706]' : 'text-[#665345]'
+            }`}>
+              {graphemeCount} / {MAX_CHARS}
             </span>
           </div>
 
           {/* Typewriter Styled Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting || !content.trim()}
+            disabled={isSubmitting || !content.trim() || isOver}
             className="flex items-center space-x-2 px-5 py-2.5 rounded-lg font-medium text-white transition-all bg-[#b24c32] hover:bg-[#963b23] border border-[#2a2421] disabled:opacity-40 disabled:pointer-events-none shadow-[2px_2px_0px_#2a2421] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_#2a2421] duration-100"
           >
             {isSubmitting ? (
