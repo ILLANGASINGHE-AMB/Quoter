@@ -23,7 +23,9 @@ export default function MessageComposer({ onMessagePosted }) {
   const [graphemeCount, setGraphemeCount] = useState(0);
 
   useEffect(() => {
-    setGraphemeCount(countGraphemes(content));
+    // Exclude all whitespace characters from count
+    const textWithoutSpaces = content.replace(/\s/g, '');
+    setGraphemeCount(countGraphemes(textWithoutSpaces));
   }, [content]);
 
   const checkRateLimit = () => {
@@ -55,7 +57,8 @@ export default function MessageComposer({ onMessagePosted }) {
       return;
     }
 
-    const length = countGraphemes(trimmed);
+    const textWithoutSpaces = trimmed.replace(/\s/g, '');
+    const length = countGraphemes(textWithoutSpaces);
     if (length > 500) {
       setError('අකුරු සීමාව 500 ඉක්මවා ඇත. (Character limit of 500 exceeded.)');
       return;

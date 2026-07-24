@@ -9,6 +9,6 @@ Core Tech Stack:
 Frontend: React 19, Vite 8, Tailwind CSS v4, and Lucide React.
 Backend/Database: Supabase (PostgreSQL with RLS policy locks and Realtime Channels for instant post & reply propagation).
 Validation & Abuse Controls:
-Grapheme-aware visual character counting via Intl.Segmenter (limited to 500 visual characters).
+Grapheme-aware visual character counting via Intl.Segmenter (limited to 500 visual characters, excluding spaces).
 Database varchar limits set up to 1500 code points to cover combining Sinhala character marks safely.
 Client-side rate-limiter allowing a maximum of 5 messages or replies per minute using localStorage timestamps.

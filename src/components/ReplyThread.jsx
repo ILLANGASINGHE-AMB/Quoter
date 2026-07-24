@@ -27,7 +27,9 @@ export default function ReplyThread({ messageId, onReplyCountChange }) {
   const repliesEndRef = useRef(null);
 
   useEffect(() => {
-    setGraphemeCount(countGraphemes(content));
+    // Exclude all whitespace characters from count
+    const textWithoutSpaces = content.replace(/\s/g, '');
+    setGraphemeCount(countGraphemes(textWithoutSpaces));
   }, [content]);
 
   const fetchReplies = async () => {
