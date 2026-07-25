@@ -215,10 +215,10 @@ export default function App() {
 
       {/* About Modal */}
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
-
-      {/* Floating Refresh Action Button */}
-      <FloatingRefreshBtn onRefresh={fetchMessages} />
     </div>
+
+    {/* Floating Refresh Action Button */}
+    <FloatingRefreshBtn onRefresh={fetchMessages} />
     </>
   );
 }
