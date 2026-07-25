@@ -18,6 +18,7 @@ export default function App() {
   const [error, setError] = useState('');
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [isLoadingScreen, setIsLoadingScreen] = useState(true);
+  const [isFadingOut, setIsFadingOut] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date().toDateString());
   const [creatorButtonText, setCreatorButtonText] = useState('නිර්මාතෘ හමුවන්න');
   const [activeTab, setActiveTab] = useState('සියල්ල');
@@ -87,10 +88,18 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const fadeTimer = setTimeout(() => {
+      setIsFadingOut(true);
+    }, 1200);
+
+    const unmountTimer = setTimeout(() => {
       setIsLoadingScreen(false);
-    }, 1500); // 1.5 seconds loading screen
-    return () => clearTimeout(timer);
+    }, 1700);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(unmountTimer);
+    };
   }, []);
 
   const handleMessagePosted = () => {
@@ -123,12 +132,10 @@ export default function App() {
       return 0; // maintain original created_at desc order from fetch
     });
 
-  if (isLoadingScreen) {
-    return <LoadingScreen />;
-  }
-
   return (
-    <div className="relative min-h-screen bg-[#FAF6EE] text-[#2A2421] flex flex-col justify-between selection:bg-[#eadcb9] selection:text-[#2A2421]">
+    <>
+      {isLoadingScreen && <LoadingScreen isFadingOut={isFadingOut} />}
+      <div className="relative min-h-screen bg-[#FAF6EE] text-[#2A2421] flex flex-col justify-between selection:bg-[#eadcb9] selection:text-[#2A2421] animate-fade-in">
       
       {/* Decorative top margin line (reminiscent of letterpress margin guides) */}
       <div className="w-full h-1 bg-[#b24c32] opacity-80" />
@@ -212,5 +219,6 @@ export default function App() {
       {/* Floating Refresh Action Button */}
       <FloatingRefreshBtn onRefresh={fetchMessages} />
     </div>
+    </>
   );
 }

@@ -1,9 +1,13 @@
 import React from 'react';
 import logo from '../assets/logo.png';
 
-export default function LoadingScreen() {
+export default function LoadingScreen({ isFadingOut }) {
   return (
-    <div className="fixed inset-0 bg-[#FAF6EE] flex flex-col items-center justify-center p-6 gap-3 z-50 select-none">
+    <div 
+      className={`fixed inset-0 bg-[#FAF6EE] flex flex-col items-center justify-center p-6 gap-3 z-50 select-none transition-opacity duration-500 ease-out ${
+        isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
+      }`}
+    >
       <img src={logo} alt="නිර්නාම Logo" className="h-16 md:h-20 w-auto object-contain mb-2" />
       <h1 className="text-3xl font-bold text-[#2A2421] font-serif tracking-tight">නිර්නාම</h1>
       <p className="text-sm text-[#665345] font-serif italic text-center">
@@ -16,3 +20,4 @@ export default function LoadingScreen() {
     </div>
   );
 }
+
