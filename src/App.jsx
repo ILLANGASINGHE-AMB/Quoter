@@ -218,7 +218,7 @@ export default function App() {
     </div>
 
     {/* Floating Refresh Action Button */}
-    <FloatingRefreshBtn onRefresh={fetchMessages} />
+    {!isLoadingScreen && <FloatingRefreshBtn onRefresh={fetchMessages} />}
     </>
   );
 }

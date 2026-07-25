@@ -26,7 +26,7 @@ export default function FloatingRefreshBtn({ onRefresh }) {
     <>
       <button
         id="floatingRefreshBtn"
-        className="floating-refresh-btn"
+        className="floating-refresh-btn animate-fade-in"
         aria-label="Refresh"
         title="Refresh Page"
         onClick={handleRefresh}

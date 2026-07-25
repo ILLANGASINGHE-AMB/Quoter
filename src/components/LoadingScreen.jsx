@@ -4,7 +4,7 @@ import logo from '../assets/logo.png';
 export default function LoadingScreen({ isFadingOut }) {
   return (
     <div 
-      className={`fixed inset-0 bg-[#FAF6EE] flex flex-col items-center justify-center p-6 gap-3 z-50 select-none transition-opacity duration-500 ease-out ${
+      className={`fixed inset-0 bg-[#FAF6EE] flex flex-col items-center justify-center p-6 gap-3 z-[10000] select-none transition-opacity duration-500 ease-out ${
         isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
