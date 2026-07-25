@@ -1,0 +1,230 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: transparent; }
+  .ni-root { font-family: 'Noto Sans Sinhala', var(--font-sans), sans-serif; color: var(--text-primary); }
+  .ni-section { margin-bottom: 2rem; }
+  .ni-label { font-size: 11px; font-weight: 500; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+  .ni-card { background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+  .ni-divider { border: none; border-top: 0.5px solid var(--border); margin: 1.5rem 0; }
+
+  /* SPLASH SCREEN */
+  .splash { background: #F5F0E8; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2.5rem 1.5rem; gap: 1rem; border: 0.5px solid #E0D8C8; }
+  .splash-quill { font-size: 40px; line-height: 1; }
+  .splash-title { font-size: 28px; font-weight: 700; color: #3D2B1A; letter-spacing: -0.02em; }
+  .splash-sub { font-size: 14px; color: #7A5C3A; }
+  .splash-spinner { width: 28px; height: 28px; border: 2.5px solid #E0D8C8; border-top-color: #8B5E3C; border-radius: 50%; animation: spin 0.8s linear infinite; margin-top: 0.5rem; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ANON BANNER */
+  .banner { background: #FDF7F0; border: 0.5px solid #E8D5B8; border-radius: 10px; padding: 0.75rem 1rem; display: flex; gap: 10px; align-items: flex-start; }
+  .banner-icon { color: #9B6A3A; font-size: 16px; margin-top: 1px; flex-shrink: 0; }
+  .banner-title { font-size: 13px; font-weight: 500; color: #6B4226; margin-bottom: 2px; }
+  .banner-body { font-size: 12px; color: #9B6A3A; line-height: 1.5; }
+
+  /* COMPOSE BOX */
+  .compose { background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem; }
+  .compose textarea { width: 100%; border: none; background: transparent; font-family: 'Noto Sans Sinhala', var(--font-sans), sans-serif; font-size: 14px; color: var(--text-primary); resize: none; outline: none; line-height: 1.6; min-height: 80px; }
+  .compose textarea::placeholder { color: var(--text-muted); }
+  .compose-footer { display: flex; align-items: center; justify-content: space-between; border-top: 0.5px solid var(--border); padding-top: 10px; margin-top: 8px; }
+  .char-counter { font-size: 12px; color: var(--text-muted); transition: color 0.2s; }
+  .char-counter.warn { color: #BA7517; }
+  .char-counter.over { color: #A32D2D; font-weight: 500; }
+  .char-bar { width: 60px; height: 3px; background: var(--border); border-radius: 99px; overflow: hidden; margin-right: 6px; }
+  .char-fill { height: 100%; border-radius: 99px; background: #8B5E3C; transition: width 0.15s, background 0.2s; }
+  .char-fill.warn { background: #BA7517; }
+  .char-fill.over { background: #A32D2D; }
+  .counter-wrap { display: flex; align-items: center; gap: 0; }
+  .submit-btn { background: #8B5E3C; color: #FFF8F0; border: none; border-radius: 8px; padding: 7px 16px; font-size: 13px; font-family: 'Noto Sans Sinhala', var(--font-sans), sans-serif; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+  .submit-btn:hover { background: #7A5030; }
+  .submit-btn:disabled { background: #C9A882; cursor: not-allowed; }
+
+  /* FEED HEADER */
+  .feed-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .feed-title { font-size: 15px; font-weight: 500; color: var(--text-primary); }
+  .feed-badges { display: flex; gap: 8px; }
+  .badge { font-size: 12px; padding: 3px 10px; border-radius: 99px; font-weight: 400; }
+  .badge-total { background: var(--surface-1); border: 0.5px solid var(--border); color: var(--text-secondary); }
+  .badge-today { background: #FDF7F0; border: 0.5px solid #E8D5B8; color: #7A5030; }
+
+  /* POST CARDS */
+  .post-card { background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 10px; transition: border-color 0.15s; }
+  .post-card:hover { border-color: var(--border-strong); }
+  .post-body { font-size: 14px; color: var(--text-primary); line-height: 1.7; margin-bottom: 12px; white-space: pre-wrap; }
+  .post-meta { display: flex; align-items: center; justify-content: space-between; }
+  .post-time { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+  .post-actions { display: flex; align-items: center; gap: 12px; }
+  .reply-btn { font-size: 12px; color: var(--text-secondary); background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 4px 0; font-family: inherit; transition: color 0.15s; }
+  .reply-btn:hover { color: #8B5E3C; }
+  .reply-count { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 99px; font-size: 11px; color: var(--text-secondary); padding: 1px 7px; }
+  .post-card.has-replies { border-left: 2.5px solid #C9A882; border-radius: 0 12px 12px 0; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 2rem 1rem; }
+  .empty-icon { font-size: 28px; margin-bottom: 8px; color: #C9A882; }
+  .empty-title { font-size: 14px; font-weight: 500; color: var(--text-secondary); margin-bottom: 4px; }
+  .empty-body { font-size: 12px; color: var(--text-muted); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0; border-bottom: 0.5px solid var(--border); margin-bottom: 1.5rem; }
+  .tab { padding: 8px 14px; font-size: 13px; border: none; background: none; cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -0.5px; transition: color 0.15s, border-color 0.15s; font-family: 'Noto Sans Sinhala', var(--font-sans), sans-serif; }
+  .tab.active { color: #8B5E3C; border-bottom-color: #8B5E3C; }
+  .tab:hover { color: var(--text-secondary); }
+</style>
+
+<div class="ni-root">
+  <h2 class="sr-only">Nirnaama UI improvements preview</h2>
+
+  <!-- 1. LOADING SCREEN -->
+  <div class="ni-section">
+    <p class="ni-label">1 · Branded loading screen</p>
+    <div class="splash">
+      <div class="splash-quill">🖊</div>
+      <div class="splash-title">නිර්නාම</div>
+      <div class="splash-sub">අදහස් සහ සිතුවිලි නිදහසේ බෙදාගන්න</div>
+      <div class="splash-spinner"></div>
+    </div>
+  </div>
+
+  <hr class="ni-divider">
+
+  <!-- 2. ANON BANNER -->
+  <div class="ni-section">
+    <p class="ni-label">2 · Friendlier anonymity notice</p>
+    <div class="banner">
+      <i class="ti ti-shield-lock banner-icon" aria-hidden="true"></i>
+      <div>
+        <div class="banner-title">නිර්නාමිකයි · සීමාවන් නොමැත</div>
+        <div class="banner-body">ලියාපදිංචියක් අවශ්‍ය නොවේ. ඔබ ලියන සෑම දෙයක්ම සම්පූර්ණයෙන්ම නිර්නාමිකව පළ වේ.</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="ni-divider">
+
+  <!-- 3. COMPOSE WITH POLISHED COUNTER -->
+  <div class="ni-section">
+    <p class="ni-label">3 · Compose box with polished character counter</p>
+    <div class="compose">
+      <textarea id="ta" maxlength="500" placeholder="ඔබේ පණිවිඩය මෙහි ලියන්න..." oninput="updateCounter(this)"></textarea>
+      <div class="compose-footer">
+        <div class="counter-wrap">
+          <div class="char-bar"><div class="char-fill" id="cfill" style="width:0%"></div></div>
+          <span class="char-counter" id="ccount">0 / 500</span>
+        </div>
+        <button class="submit-btn" id="sbtn" disabled onclick="submitPost()">පල කරන්න ↗</button>
+      </div>
+    </div>
+  </div>
+
+  <hr class="ni-divider">
+
+  <!-- 4. FEED WITH IMPROVEMENTS -->
+  <div class="ni-section">
+    <p class="ni-label">4 · Feed with relative timestamps · language-consistent labels · reply highlights</p>
+    <div class="feed-header">
+      <span class="feed-title">පණිවිඩ එකතුව</span>
+      <div class="feed-badges">
+        <span class="badge badge-total" id="totalBadge">109 පණිවිඩ</span>
+        <span class="badge badge-today" id="todayBadge">අද: 3</span>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="setTab(this,'all')">සියල්ල</button>
+      <button class="tab" onclick="setTab(this,'today')">අද</button>
+      <button class="tab" onclick="setTab(this,'popular')">ජනප්‍රිය</button>
+    </div>
+
+    <div id="feed">
+      <div class="post-card has-replies">
+        <div class="post-body">අවිවාහිතව ඉලෝ ගාසන් දෙලු දාන කාලයක් එනවා මිත්‍රයා... ✏️</div>
+        <div class="post-meta">
+          <span class="post-time"><i class="ti ti-clock" style="font-size:13px" aria-hidden="true"></i> ඊයේ</span>
+          <div class="post-actions">
+            <span class="reply-count">3 පිළිතුරු</span>
+            <button class="reply-btn"><i class="ti ti-message-circle" style="font-size:14px" aria-hidden="true"></i> පිළිතුරු දෙන්න</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="post-card">
+        <div class="post-body">පැතුවා සඳ මා දවා හලු කර
+වෙන්වා යන්නට භවනවා,
+අමාවක දින අහසේ කළුවර
+පාළුවක් බව දැනෙනවා,
+
+-නිරාවිෙය් අතීත මහංක-</div>
+        <div class="post-meta">
+          <span class="post-time"><i class="ti ti-clock" style="font-size:13px" aria-hidden="true"></i> පැය 2කට පෙර</span>
+          <div class="post-actions">
+            <span class="reply-count">0 පිළිතුරු</span>
+            <button class="reply-btn"><i class="ti ti-message-circle" style="font-size:14px" aria-hidden="true"></i> පිළිතුරු දෙන්න</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="post-card">
+        <div class="post-body">ජීවිතය කියන්නේ ගමනක්. හැම දිනකම නව පාඩමක්.</div>
+        <div class="post-meta">
+          <span class="post-time"><i class="ti ti-clock" style="font-size:13px" aria-hidden="true"></i> මිනිත්තු 20කට පෙර</span>
+          <div class="post-actions">
+            <span class="reply-count">0 පිළිතුරු</span>
+            <button class="reply-btn"><i class="ti ti-message-circle" style="font-size:14px" aria-hidden="true"></i> පිළිතුරු දෙන්න</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="ni-divider">
+
+  <!-- 5. EMPTY STATE -->
+  <div class="ni-section">
+    <p class="ni-label">5 · Empty state (when today has no posts)</p>
+    <div class="ni-card">
+      <div class="empty-state">
+        <div class="empty-icon"><i class="ti ti-writing" style="font-size:32px; color:#C9A882" aria-hidden="true"></i></div>
+        <div class="empty-title">අද තවම පණිවිඩ නැත</div>
+        <div class="empty-body">පළමු අදහස ලියන්නේ ඔබ විය හැකිය.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function updateCounter(ta) {
+  var len = ta.value.length;
+  var pct = (len / 500) * 100;
+  var fill = document.getElementById('cfill');
+  var count = document.getElementById('ccount');
+  var btn = document.getElementById('sbtn');
+  count.textContent = len + ' / 500';
+  fill.style.width = Math.min(pct, 100) + '%';
+  fill.className = 'char-fill' + (pct >= 100 ? ' over' : pct >= 80 ? ' warn' : '');
+  count.className = 'char-counter' + (pct >= 100 ? ' over' : pct >= 80 ? ' warn' : '');
+  btn.disabled = len === 0 || len > 500;
+}
+
+function submitPost() {
+  var ta = document.getElementById('ta');
+  if (!ta.value.trim()) return;
+  var feed = document.getElementById('feed');
+  var card = document.createElement('div');
+  card.className = 'post-card';
+  card.innerHTML = '<div class="post-body">' + ta.value.replace(/</g,'&lt;') + '</div><div class="post-meta"><span class="post-time"><i class="ti ti-clock" style="font-size:13px" aria-hidden="true"></i> දැන්</span><div class="post-actions"><span class="reply-count">0 පිළිතුරු</span><button class="reply-btn"><i class="ti ti-message-circle" style="font-size:14px" aria-hidden="true"></i> පිළිතුරු දෙන්න</button></div></div>';
+  feed.insertBefore(card, feed.firstChild);
+  ta.value = '';
+  updateCounter(ta);
+  var b = document.getElementById('todayBadge');
+  var n = parseInt(b.textContent.replace(/\D/g,'')) + 1;
+  b.textContent = 'අද: ' + n;
+}
+
+function setTab(el, tab) {
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+}
+</script>

@@ -6,6 +6,7 @@ import LoadingScreen from './components/LoadingScreen';
 import AnonBanner from './components/AnonBanner';
 import FeedTabs from './components/FeedTabs';
 import FeedHeader from './components/FeedHeader';
+import FloatingRefreshBtn from './components/FloatingRefreshBtn';
 import EmptyState from './components/EmptyState';
 import { User, ExternalLink } from 'lucide-react';
 import { supabase } from './supabaseClient';
@@ -171,7 +172,6 @@ export default function App() {
         {/* Message Feed Section */}
         <section className="space-y-6">
           <FeedHeader 
-            onRefresh={fetchMessages} 
             total={totalFeeds} 
             todayCount={todaysFeeds} 
           />
@@ -208,6 +208,9 @@ export default function App() {
 
       {/* About Modal */}
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+
+      {/* Floating Refresh Action Button */}
+      <FloatingRefreshBtn onRefresh={fetchMessages} />
     </div>
   );
 }

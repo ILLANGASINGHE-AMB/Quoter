@@ -93,3 +93,51 @@ textarea:focus, input:focus {
   transform: translate(-1px, -1px);
   box-shadow: 4px 4px 0px #2a2421;
 }
+
+/* Floating Refresh Action Button (FAB) */
+.floating-refresh-btn {
+    position: fixed;
+    right: 20px;
+    bottom: 25px;
+
+    width: 58px;
+    height: 58px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #d89b8d;
+    color: #fff;
+
+    font-size: 22px;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+
+    z-index: 9999;
+
+    transition: all .25s ease;
+}
+
+.floating-refresh-btn:hover {
+    transform: scale(1.08);
+}
+
+.floating-refresh-btn:active {
+    transform: scale(0.95);
+}
+
+@media (max-width:768px) {
+    .floating-refresh-btn{
+        right:18px;
+        bottom:22px;
+
+        width:56px;
+        height:56px;
+    }
+}
+
