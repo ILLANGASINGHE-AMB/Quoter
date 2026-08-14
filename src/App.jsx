@@ -155,7 +155,7 @@ export default function App() {
           className="hidden md:block w-full h-full bg-no-repeat bg-cover bg-top"
           style={{
             backgroundImage: `url(${kandyBg})`,
-            opacity: 0.70,
+            opacity: 0.25,
             mixBlendMode: 'multiply',
           }}
         />
@@ -167,7 +167,7 @@ export default function App() {
             className="absolute left-0 top-0 w-[58%] h-full bg-no-repeat bg-[position:left_top] bg-[size:auto_100%]"
             style={{
               backgroundImage: `url(${kandyBg})`,
-              opacity: 0.70,
+              opacity: 0.25,
               mixBlendMode: 'multiply',
               maskImage: 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
               WebkitMaskImage: 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
@@ -178,7 +178,7 @@ export default function App() {
             className="absolute right-0 top-0 w-[58%] h-full bg-no-repeat bg-[position:right_top] bg-[size:auto_100%]"
             style={{
               backgroundImage: `url(${kandyBg})`,
-              opacity: 0.70,
+              opacity: 0.25,
               mixBlendMode: 'multiply',
               maskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
               WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
