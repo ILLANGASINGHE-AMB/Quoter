@@ -11,6 +11,7 @@ import EmptyState from './components/EmptyState';
 import { User, ExternalLink } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import logo from './assets/logo.png';
+import kandyBg from './assets/newBG_Kandy.png';
 
 export default function App() {
   const [messages, setMessages] = useState([]);
@@ -138,7 +139,28 @@ export default function App() {
       <div className="relative min-h-screen bg-[#FAF6EE] text-[#2A2421] flex flex-col justify-between selection:bg-[#eadcb9] selection:text-[#2A2421] animate-fade-in">
       
       {/* Decorative top margin line (reminiscent of letterpress margin guides) */}
-      <div className="w-full h-1 bg-[#b24c32] opacity-80" />
+      <div className="relative z-10 w-full h-1 bg-[#b24c32] opacity-80" />
+
+      {/* Kandyan Perahera Watermark Background Layer */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-0 overflow-hidden" 
+        aria-hidden="true"
+      >
+        <div 
+          className="absolute inset-0 bg-no-repeat bg-cover bg-bottom md:bg-center transition-opacity duration-700"
+          style={{
+            backgroundImage: `url(${kandyBg})`,
+            opacity: 0.18,
+          }}
+        />
+        {/* Soft subtle translucent cream overlay to keep message box & center interaction crystal clear */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(250, 246, 238, 0.45) 0%, rgba(250, 246, 238, 0.15) 60%, rgba(250, 246, 238, 0) 100%)',
+          }}
+        />
+      </div>
 
       {/* Creator link button (upper right corner) */}
       <div className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 md:top-6 md:right-8 z-20">
@@ -201,7 +223,7 @@ export default function App() {
       </div>
 
       {/* Footer (Designed like a typescript publication footnote) */}
-      <footer className="w-full text-center py-6 border-t border-[#3c332f]/10 text-[#665345] text-xs bg-[#f5eedf]/60 backdrop-blur-sm px-4">
+      <footer className="relative z-10 w-full text-center py-6 border-t border-[#3c332f]/10 text-[#665345] text-xs bg-[#f5eedf]/60 backdrop-blur-sm px-4">
         <div className="max-w-3xl mx-auto flex flex-col md:flex-row justify-between items-center gap-2 font-mono">
           <p>© {new Date().getFullYear()} Anonymous Sinhala Message Board.</p>
           <p 
