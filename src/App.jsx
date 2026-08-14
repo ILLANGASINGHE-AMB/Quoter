@@ -143,21 +143,48 @@ export default function App() {
 
       {/* Kandyan Perahera Top Section Background (Hero & Composer Only) */}
       <div 
-        className="absolute top-0 left-0 right-0 h-[720px] md:h-[860px] pointer-events-none z-0 overflow-hidden" 
+        className="absolute top-0 left-0 right-0 h-[680px] sm:h-[740px] md:h-[860px] pointer-events-none z-0 overflow-hidden" 
         style={{
-          maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%)',
+          maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 65%, rgba(0,0,0,0) 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 65%, rgba(0,0,0,0) 100%)',
         }}
         aria-hidden="true"
       >
+        {/* Desktop View (Single wide landscape composition) */}
         <div 
-          className="w-full h-full bg-no-repeat bg-cover bg-top"
+          className="hidden md:block w-full h-full bg-no-repeat bg-cover bg-top"
           style={{
             backgroundImage: `url(${kandyBg})`,
-            opacity: 0.65,
+            opacity: 0.70,
             mixBlendMode: 'multiply',
           }}
         />
+
+        {/* Mobile View (Framed left elephant & right drummers/temple) */}
+        <div className="md:hidden relative w-full h-full">
+          {/* Left Elephant Layer */}
+          <div 
+            className="absolute left-0 top-0 w-[58%] h-full bg-no-repeat bg-[position:left_top] bg-[size:auto_100%]"
+            style={{
+              backgroundImage: `url(${kandyBg})`,
+              opacity: 0.70,
+              mixBlendMode: 'multiply',
+              maskImage: 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
+              WebkitMaskImage: 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
+            }}
+          />
+          {/* Right Temple & Drummers Layer */}
+          <div 
+            className="absolute right-0 top-0 w-[58%] h-full bg-no-repeat bg-[position:right_top] bg-[size:auto_100%]"
+            style={{
+              backgroundImage: `url(${kandyBg})`,
+              opacity: 0.70,
+              mixBlendMode: 'multiply',
+              maskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
+              WebkitMaskImage: 'linear-gradient(to left, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)',
+            }}
+          />
+        </div>
       </div>
 
       {/* Creator link button (upper right corner) */}
