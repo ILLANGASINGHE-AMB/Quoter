@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import ReplyThread from './ReplyThread';
-import { MessageCircle, Clock, ChevronDown, ChevronUp, Heart, ArrowUp } from 'lucide-react';
+import { MessageCircle, Clock, ChevronDown, ChevronUp, Heart, Pin } from 'lucide-react';
 import { relativeTime } from '../utils/relativeTime';
 import { getUserIp } from '../utils/getIp';
 
@@ -214,21 +214,18 @@ export default function MessageCard({ message }) {
           </div>
 
           <div className="flex items-center space-x-2">
-            {/* Push Button (Outline Icon) */}
+            {/* Push / Pin Button (Pin Outline Icon) */}
             <button
               onClick={handlePushPost}
               disabled={isPushing}
               title={pushedToday ? 'අද දින දැනටමත් තල්ලු කර ඇත (Already pushed today)' : 'පණිවිඩය ඉහළට තල්ලු කරන්න (Push post up)'}
-              className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg border transition-all duration-200 ${
+              className={`flex items-center justify-center p-2 rounded-lg border transition-all duration-200 ${
                 pushedToday 
                   ? 'bg-[#f5eedf]/50 text-[#887465] border-[#3c332f]/20 cursor-not-allowed opacity-75' 
                   : 'bg-transparent border-[#3c332f]/20 hover:bg-[#f5eedf] text-[#665345] hover:text-[#b24c32] hover:border-[#b24c32]/40 active:translate-y-[0.5px]'
               }`}
             >
-              <ArrowUp className={`h-4 w-4 ${isPushing ? 'animate-bounce' : ''}`} />
-              <span className="font-sans font-medium text-xs hidden sm:inline">
-                {pushedToday ? 'තල්ලු කළා' : 'උඩට'}
-              </span>
+              <Pin className={`h-4 w-4 ${isPushing ? 'animate-bounce' : ''}`} />
             </button>
 
             {/* Like Button (Heart Outline Icon) */}
