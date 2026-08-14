@@ -8,11 +8,16 @@ import FeedTabs from './components/FeedTabs';
 import FeedHeader from './components/FeedHeader';
 import FloatingRefreshBtn from './components/FloatingRefreshBtn';
 import EmptyState from './components/EmptyState';
-import { User, ExternalLink } from 'lucide-react';
+import { User, ExternalLink, Bell, BellRing } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import logo from './assets/logo.png';
 import kandyBg from './assets/newBG_Kandy.png';
 import mobileBg from './assets/mobileBG.png';
+import {
+  getNotificationPermission,
+  requestNotificationPermission,
+  showWebNotification,
+} from './utils/notifications';
 
 export default function App() {
   const [messages, setMessages] = useState([]);
@@ -24,8 +29,10 @@ export default function App() {
   const [currentDate, setCurrentDate] = useState(new Date().toDateString());
   const [creatorButtonText, setCreatorButtonText] = useState('නිර්මාතෘ හමුවන්න');
   const [activeTab, setActiveTab] = useState('සියල්ල');
+  const [notifPermission, setNotifPermission] = useState('default');
 
   useEffect(() => {
+    setNotifPermission(getNotificationPermission());
     if (typeof window !== 'undefined' && navigator.language) {
       const userLang = navigator.language.toLowerCase();
       const docLang = document.documentElement.lang?.toLowerCase();
@@ -36,6 +43,17 @@ export default function App() {
       }
     }
   }, []);
+
+  const handleEnableNotifications = async () => {
+    const perm = await requestNotificationPermission();
+    setNotifPermission(perm);
+    if (perm === 'granted') {
+      showWebNotification(
+        'නිර්නාම (Quoter)',
+        'දැනුම්දීම් සාර්ථකව සක්‍රිය කරන ලදි! (Notifications enabled!)'
+      );
+    }
+  };
 
   const fetchMessages = async () => {
     try {
@@ -55,23 +73,60 @@ export default function App() {
     }
   };
 
-  // Fetch messages on mount and subscribe to realtime insertions
+  // Fetch messages on mount and subscribe to realtime events
   useEffect(() => {
     fetchMessages();
 
     const channel = supabase
-      .channel('messages-feed-channel')
+      .channel('messages-feed-global')
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages' },
         (payload) => {
           setMessages((prev) => {
-            // Check for duplicates
             if (prev.some((m) => m.id === payload.new.id)) return prev;
-            // Initialize replies as empty array for new real-time message
             const newMsg = { ...payload.new, replies: [] };
             return [newMsg, ...prev];
           });
+          showWebNotification(
+            'නිර්නාම - නව පණිවිඩයක්!',
+            'නව පණිවිඩයක් පුවරුවට එක් කරන ලදී. (New post added)'
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'messages' },
+        (payload) => {
+          setMessages((prev) =>
+            prev.map((m) => (m.id === payload.new.id ? { ...m, ...payload.new } : m))
+          );
+          if (payload.new.pushed_at) {
+            showWebNotification(
+              'නිර්නාම - පණිවිඩයක් උඩට තල්ලු විය!',
+              'පණිවිඩයක් ඉහළට තල්ලු කරන ලදී. (Post pushed up)'
+            );
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'likes' },
+        () => {
+          showWebNotification(
+            'නිර්නාම - නව ලයික් එකක්!',
+            'පණිවිඩයකට නව ලයික් එකක් ලැබුණි. (New like added)'
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'replies' },
+        () => {
+          showWebNotification(
+            'නිර්නාම - නව පිළිතුරක්!',
+            'පණිවිඩයකට පිළිතුරක් එක් කරන ලදී. (New reply added)'
+          );
         }
       )
       .subscribe();
@@ -110,28 +165,31 @@ export default function App() {
 
   const totalFeeds = messages.length;
   const todaysFeeds = messages.filter((msg) => {
-    const msgDate = new Date(msg.created_at);
-    return msgDate.toDateString() === currentDate;
+    const effectiveDate = new Date(msg.pushed_at || msg.created_at);
+    return effectiveDate.toDateString() === currentDate;
   }).length;
 
   const filteredMessages = messages
     .filter((msg) => {
       if (activeTab === 'අද') {
-        const msgDate = new Date(msg.created_at);
-        return msgDate.toDateString() === currentDate;
+        const effectiveDate = new Date(msg.pushed_at || msg.created_at);
+        return effectiveDate.toDateString() === currentDate;
       }
       return true;
     })
     .sort((a, b) => {
+      const timeA = new Date(a.pushed_at || a.created_at).getTime();
+      const timeB = new Date(b.pushed_at || b.created_at).getTime();
+
       if (activeTab === 'ජනප්‍රිය') {
         const countA = a.replies ? a.replies.length : 0;
         const countB = b.replies ? b.replies.length : 0;
         if (countB === countA) {
-          return new Date(b.created_at) - new Date(a.created_at);
+          return timeB - timeA;
         }
         return countB - countA;
       }
-      return 0; // maintain original created_at desc order from fetch
+      return timeB - timeA;
     });
 
   return (
@@ -170,6 +228,28 @@ export default function App() {
             WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%)',
           }}
         />
+      </div>
+
+      {/* Notifications Button (upper left corner) */}
+      <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 md:top-6 md:left-8 z-20">
+        <button
+          onClick={handleEnableNotifications}
+          className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs md:text-sm font-serif font-medium border rounded-md sm:rounded-lg shadow-[1.5px_1.5px_0px_#2a2421] sm:shadow-[2px_2px_0px_#2a2421] transition-all duration-150 active:translate-y-[0.5px] active:shadow-[1px_1px_0px_#2a2421] ${
+            notifPermission === 'granted'
+              ? 'bg-[#fbfbf9] text-[#b24c32] border-[#b24c32]/50'
+              : 'bg-[#b24c32] text-white border-[#3c332f] hover:bg-[#963b23]'
+          }`}
+          title="දැනුම්දීම් සක්‍රිය කරන්න (Toggle Browser Notifications)"
+        >
+          {notifPermission === 'granted' ? (
+            <BellRing className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-[#b24c32]" />
+          ) : (
+            <Bell className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
+          )}
+          <span className="hidden xs:inline sm:inline">
+            {notifPermission === 'granted' ? 'දැනුම්දීම් active' : 'දැනුම්දීම් (Alerts)'}
+          </span>
+        </button>
       </div>
 
       {/* Creator link button (upper right corner) */}
@@ -254,3 +334,4 @@ export default function App() {
     </>
   );
 }
+
