@@ -141,24 +141,21 @@ export default function App() {
       {/* Decorative top margin line (reminiscent of letterpress margin guides) */}
       <div className="relative z-10 w-full h-1 bg-[#b24c32] opacity-80" />
 
-      {/* Kandyan Perahera Watermark Background Layer (Static in viewport, seamlessly blended) */}
+      {/* Kandyan Perahera Top Section Background (Hero & Composer Only) */}
       <div 
-        className="fixed inset-0 pointer-events-none z-0 overflow-hidden" 
+        className="absolute top-0 left-0 right-0 h-[720px] md:h-[860px] pointer-events-none z-0 overflow-hidden" 
+        style={{
+          maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 70%, rgba(0,0,0,0) 100%)',
+        }}
         aria-hidden="true"
       >
         <div 
-          className="absolute inset-0 bg-no-repeat bg-cover bg-bottom md:bg-center transition-opacity duration-700"
+          className="w-full h-full bg-no-repeat bg-cover bg-top"
           style={{
             backgroundImage: `url(${kandyBg})`,
-            opacity: 0.22,
+            opacity: 0.65,
             mixBlendMode: 'multiply',
-          }}
-        />
-        {/* Soft subtle translucent cream overlay to keep message box & center interaction crystal clear */}
-        <div 
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse at center, rgba(250, 246, 238, 0.55) 0%, rgba(250, 246, 238, 0.2) 65%, rgba(250, 246, 238, 0) 100%)',
           }}
         />
       </div>
