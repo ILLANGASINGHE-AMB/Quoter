@@ -99,12 +99,6 @@ export default function App() {
           setMessages((prev) =>
             prev.map((m) => (m.id === payload.new.id ? { ...m, ...payload.new } : m))
           );
-          if (payload.new.pushed_at) {
-            showWebNotification(
-              'නිර්නාම - පණිවිඩයක් උඩට තල්ලු විය!',
-              'පණිවිඩයක් ඉහළට තල්ලු කරන ලදී. (Post pushed up)'
-            );
-          }
         }
       )
       .on(
@@ -163,21 +157,21 @@ export default function App() {
 
   const totalFeeds = messages.length;
   const todaysFeeds = messages.filter((msg) => {
-    const effectiveDate = new Date(msg.pushed_at || msg.created_at);
+    const effectiveDate = new Date(msg.created_at);
     return effectiveDate.toDateString() === currentDate;
   }).length;
 
   const filteredMessages = messages
     .filter((msg) => {
       if (activeTab === 'අද') {
-        const effectiveDate = new Date(msg.pushed_at || msg.created_at);
+        const effectiveDate = new Date(msg.created_at);
         return effectiveDate.toDateString() === currentDate;
       }
       return true;
     })
     .sort((a, b) => {
-      const timeA = new Date(a.pushed_at || a.created_at).getTime();
-      const timeB = new Date(b.pushed_at || b.created_at).getTime();
+      const timeA = new Date(a.created_at).getTime();
+      const timeB = new Date(b.created_at).getTime();
 
       if (activeTab === 'ජනප්‍රිය') {
         const countA = a.replies ? a.replies.length : 0;
