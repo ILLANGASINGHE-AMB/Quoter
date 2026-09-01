@@ -11,8 +11,6 @@ import EmptyState from './components/EmptyState';
 import { User, ExternalLink, Bell, BellRing } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import logo from './assets/logo.png';
-import kandyBg from './assets/newBG_Kandy.png';
-import mobileBg from './assets/mobileBG.png';
 import {
   getNotificationPermission,
   requestNotificationPermission,
@@ -199,36 +197,6 @@ export default function App() {
       
       {/* Decorative top margin line (reminiscent of letterpress margin guides) */}
       <div className="relative z-10 w-full h-1 bg-[#b24c32] opacity-80" />
-
-      {/* Kandyan Perahera Top Section Background (Hero & Composer) */}
-      <div 
-        className="absolute top-0 left-0 right-0 pointer-events-none z-0 overflow-hidden" 
-        aria-hidden="true"
-      >
-        {/* Desktop View (Single wide landscape composition) */}
-        <div 
-          className="hidden md:block w-full h-[740px] md:h-[860px] bg-no-repeat bg-cover bg-top"
-          style={{
-            backgroundImage: `url(${kandyBg})`,
-            opacity: 0.25,
-            mixBlendMode: 'multiply',
-            maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 65%, rgba(0,0,0,0) 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 65%, rgba(0,0,0,0) 100%)',
-          }}
-        />
-
-        {/* Mobile View: Full photo shown across the header as in mobileNewBG.png */}
-        <div 
-          className="md:hidden w-full h-[270px] sm:h-[340px] bg-no-repeat bg-top bg-contain"
-          style={{
-            backgroundImage: `url(${mobileBg})`,
-            opacity: 0.85,
-            mixBlendMode: 'multiply',
-            maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%)',
-            WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 85%, rgba(0,0,0,0) 100%)',
-          }}
-        />
-      </div>
 
       {/* Notifications Button (upper left corner) */}
       <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 md:top-6 md:left-8 z-20">
