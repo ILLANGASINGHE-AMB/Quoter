@@ -122,10 +122,10 @@ export default function VoiceChatModal({ isOpen, onClose }) {
 
   const startSearch = async () => {
     try {
+      setStatus('searching');
       // Get mic permission
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       localStreamRef.current = stream;
-      setStatus('searching');
 
       // Setup Supabase Channel for matchmaking and signaling
       const channel = supabase.channel('voice-matchmaking', {
@@ -214,9 +214,9 @@ export default function VoiceChatModal({ isOpen, onClose }) {
           <h2 className="text-2xl font-serif font-bold text-[#2a2421] mb-2">
             නිර්නාම ඇමතුම්
           </h2>
-          <p className="text-sm text-[#665345] mb-8 text-center">
+          <p className="text-sm text-[#665345] mb-8 text-center px-4">
             {status === 'idle' && 'අහඹු ලෙස සම්බන්ධ වී කතා කරන්න (Talk anonymously)'}
-            {status === 'searching' && 'සම්බන්ධ වීමට අයෙකු සොයමින්...'}
+            {status === 'searching' && 'මයික්‍රෆෝනයට අවසර දෙන්න... (Allow mic / Searching...)'}
             {status === 'connecting' && 'සම්බන්ධ වෙමින්...'}
             {status === 'connected' && 'සම්බන්ධ විය! (Connected!)'}
           </p>

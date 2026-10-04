@@ -329,16 +329,16 @@ export default function App() {
           </p>
         </div>
       </footer>
-
-      {/* About Modal */}
-      <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
-
-      {/* Voice Chat Modal */}
-      <VoiceChatModal isOpen={isVoiceChatOpen} onClose={() => setIsVoiceChatOpen(false)} />
     </div>
 
     {/* Floating Refresh Action Button */}
     {!isLoadingScreen && <FloatingRefreshBtn onRefresh={fetchMessages} />}
+
+    {/* About Modal */}
+    <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+
+    {/* Voice Chat Modal */}
+    <VoiceChatModal isOpen={isVoiceChatOpen} onClose={() => setIsVoiceChatOpen(false)} />
     </>
   );
 }
