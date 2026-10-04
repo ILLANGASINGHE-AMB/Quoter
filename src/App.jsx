@@ -8,7 +8,8 @@ import FeedTabs from './components/FeedTabs';
 import FeedHeader from './components/FeedHeader';
 import FloatingRefreshBtn from './components/FloatingRefreshBtn';
 import EmptyState from './components/EmptyState';
-import { User, ExternalLink, Bell, BellRing } from 'lucide-react';
+import VoiceChatModal from './components/VoiceChatModal';
+import { User, ExternalLink, Bell, BellRing, Phone } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import logo from './assets/logo.png';
 import {
@@ -22,7 +23,9 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [isVoiceChatOpen, setIsVoiceChatOpen] = useState(false);
   const [isLoadingScreen, setIsLoadingScreen] = useState(true);
+  const [onlineUsersCount, setOnlineUsersCount] = useState(1);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date().toDateString());
   const [creatorButtonText, setCreatorButtonText] = useState('නිර්මාතෘ හමුවන්න');
@@ -123,8 +126,28 @@ export default function App() {
       )
       .subscribe();
 
+    // Setup Global Presence for Online Users Count
+    const clientId = Math.random().toString(36).substring(2, 15);
+    const presenceChannel = supabase.channel('global-presence', {
+      config: {
+        presence: { key: clientId }
+      }
+    });
+
+    presenceChannel
+      .on('presence', { event: 'sync' }, () => {
+        const state = presenceChannel.presenceState();
+        setOnlineUsersCount(Object.keys(state).length);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await presenceChannel.track({ online_at: new Date().toISOString() });
+        }
+      });
+
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(presenceChannel);
     };
   }, []);
 
@@ -192,8 +215,8 @@ export default function App() {
       {/* Decorative top margin line (reminiscent of letterpress margin guides) */}
       <div className="relative z-10 w-full h-1 bg-[#b24c32] opacity-80" />
 
-      {/* Notifications Button (upper left corner) */}
-      <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 md:top-6 md:left-8 z-20">
+      {/* Notifications and Voice Call Buttons (upper left corner) */}
+      <div className="absolute top-2.5 left-2.5 sm:top-4 sm:left-4 md:top-6 md:left-8 z-20 flex gap-2">
         <button
           onClick={handleEnableNotifications}
           className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs md:text-sm font-serif font-medium border rounded-md sm:rounded-lg shadow-[1.5px_1.5px_0px_#2a2421] sm:shadow-[2px_2px_0px_#2a2421] transition-all duration-150 active:translate-y-[0.5px] active:shadow-[1px_1px_0px_#2a2421] ${
@@ -212,6 +235,26 @@ export default function App() {
             {notifPermission === 'granted' ? 'දැනුම්දීම් active' : 'දැනුම්දීම් (Alerts)'}
           </span>
         </button>
+
+        <button
+          onClick={() => setIsVoiceChatOpen(true)}
+          className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs md:text-sm font-serif font-medium bg-[#f5eedf] text-[#2a2421] border border-[#3c332f] rounded-md sm:rounded-lg shadow-[1.5px_1.5px_0px_#2a2421] sm:shadow-[2px_2px_0px_#2a2421] hover:bg-[#eadcb9] transition-all duration-150 active:translate-y-[0.5px] active:shadow-[1px_1px_0px_#2a2421]"
+          title="නිර්නාම ඇමතුම් (Anonymous Voice Chat)"
+        >
+          <Phone className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-[#b24c32]" />
+          <span className="hidden xs:inline sm:inline">
+            කතා කරන්න (Voice)
+          </span>
+        </button>
+
+        {/* Online Users Indicator */}
+        <div className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs md:text-sm font-serif font-medium bg-[#fbfbf9] text-[#2a2421] border border-[#3c332f] rounded-md sm:rounded-lg shadow-[1.5px_1.5px_0px_#2a2421] sm:shadow-[2px_2px_0px_#2a2421]">
+          <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-green-500"></span>
+          </span>
+          <span>{onlineUsersCount} Online</span>
+        </div>
       </div>
 
       {/* Creator link button (upper right corner) */}
@@ -289,6 +332,9 @@ export default function App() {
 
       {/* About Modal */}
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+
+      {/* Voice Chat Modal */}
+      <VoiceChatModal isOpen={isVoiceChatOpen} onClose={() => setIsVoiceChatOpen(false)} />
     </div>
 
     {/* Floating Refresh Action Button */}
