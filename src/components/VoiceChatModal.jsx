@@ -16,6 +16,7 @@ export default function VoiceChatModal({ isOpen, onClose }) {
   const peerConnectionRef = useRef(null);
   const audioRef = useRef(null);
   const channelRef = useRef(null);
+  const statusChannelRef = useRef(null);
   const pingIntervalRef = useRef(null);
 
   // Stop everything and reset state
@@ -41,6 +42,11 @@ export default function VoiceChatModal({ isOpen, onClose }) {
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
+    }
+    
+    if (statusChannelRef.current) {
+      supabase.removeChannel(statusChannelRef.current);
+      statusChannelRef.current = null;
     }
     
     if (pingIntervalRef.current) {
@@ -141,6 +147,11 @@ export default function VoiceChatModal({ isOpen, onClose }) {
       });
       channelRef.current = channel;
 
+      // Setup status channel for global App.jsx indicator
+      const statusChannel = supabase.channel('voice-status');
+      statusChannelRef.current = statusChannel;
+      await statusChannel.subscribe();
+
       let isMatched = false;
 
       channel
@@ -198,10 +209,17 @@ export default function VoiceChatModal({ isOpen, onClose }) {
             // Start broadcasting our presence via ping
             pingIntervalRef.current = setInterval(() => {
               if (!isMatched) {
+                // To matchmaking channel
                 channel.send({
                   type: 'broadcast',
                   event: 'webrtc-signal',
                   payload: { target: 'all', sender: peerId, signal: { type: 'ping' } }
+                });
+                // To global status channel (so App.jsx knows we are waiting)
+                statusChannel.send({
+                  type: 'broadcast',
+                  event: 'ping',
+                  payload: {}
                 });
               }
             }, 2000);

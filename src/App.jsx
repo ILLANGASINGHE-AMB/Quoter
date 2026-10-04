@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import MessageComposer from './components/MessageComposer';
 import MessageFeed from './components/MessageFeed';
 import AboutModal from './components/AboutModal';
@@ -31,6 +31,8 @@ export default function App() {
   const [creatorButtonText, setCreatorButtonText] = useState('නිර්මාතෘ හමුවන්න');
   const [activeTab, setActiveTab] = useState('සියල්ල');
   const [notifPermission, setNotifPermission] = useState('default');
+  const [isCallWaiting, setIsCallWaiting] = useState(false);
+  const callWaitingTimeoutRef = useRef(null);
 
   useEffect(() => {
     setNotifPermission(getNotificationPermission());
@@ -145,9 +147,22 @@ export default function App() {
         }
       });
 
+    // Setup Voice Call Status Listener
+    const statusChannel = supabase.channel('voice-status')
+      .on('broadcast', { event: 'ping' }, () => {
+        setIsCallWaiting(true);
+        if (callWaitingTimeoutRef.current) clearTimeout(callWaitingTimeoutRef.current);
+        callWaitingTimeoutRef.current = setTimeout(() => {
+          setIsCallWaiting(false);
+        }, 4000);
+      })
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
       supabase.removeChannel(presenceChannel);
+      supabase.removeChannel(statusChannel);
+      if (callWaitingTimeoutRef.current) clearTimeout(callWaitingTimeoutRef.current);
     };
   }, []);
 
@@ -238,12 +253,16 @@ export default function App() {
 
         <button
           onClick={() => setIsVoiceChatOpen(true)}
-          className="inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs md:text-sm font-serif font-medium bg-[#f5eedf] text-[#2a2421] border border-[#3c332f] rounded-md sm:rounded-lg shadow-[1.5px_1.5px_0px_#2a2421] sm:shadow-[2px_2px_0px_#2a2421] hover:bg-[#eadcb9] transition-all duration-150 active:translate-y-[0.5px] active:shadow-[1px_1px_0px_#2a2421]"
+          className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs md:text-sm font-serif font-medium border rounded-md sm:rounded-lg shadow-[1.5px_1.5px_0px_#2a2421] sm:shadow-[2px_2px_0px_#2a2421] transition-all duration-150 active:translate-y-[0.5px] active:shadow-[1px_1px_0px_#2a2421] ${
+            isCallWaiting 
+              ? 'bg-green-100 text-green-800 border-green-600 animate-pulse hover:bg-green-200' 
+              : 'bg-[#f5eedf] text-[#2a2421] border-[#3c332f] hover:bg-[#eadcb9]'
+          }`}
           title="නිර්නාම ඇමතුම් (Anonymous Voice Chat)"
         >
-          <Phone className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 text-[#b24c32]" />
+          <Phone className={`w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 ${isCallWaiting ? 'text-green-600' : 'text-[#b24c32]'}`} />
           <span className="hidden xs:inline sm:inline">
-            කතා කරන්න (Voice)
+            {isCallWaiting ? 'JOIN CALL' : 'කතා කරන්න (Voice)'}
           </span>
         </button>
 
