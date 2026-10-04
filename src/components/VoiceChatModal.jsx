@@ -16,6 +16,7 @@ export default function VoiceChatModal({ isOpen, onClose }) {
   const peerConnectionRef = useRef(null);
   const audioRef = useRef(null);
   const channelRef = useRef(null);
+  const pingIntervalRef = useRef(null);
 
   // Stop everything and reset state
   const handleHangup = () => {
@@ -40,6 +41,11 @@ export default function VoiceChatModal({ isOpen, onClose }) {
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
+    }
+    
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
     }
   };
 
@@ -130,7 +136,6 @@ export default function VoiceChatModal({ isOpen, onClose }) {
       // Setup Supabase Channel for matchmaking and signaling
       const channel = supabase.channel('voice-matchmaking', {
         config: {
-          presence: { key: peerId },
           broadcast: { self: false }
         }
       });
@@ -141,13 +146,30 @@ export default function VoiceChatModal({ isOpen, onClose }) {
       channel
         .on('broadcast', { event: 'webrtc-signal' }, async ({ payload }) => {
           // Ignore signals not meant for us
-          if (payload.target !== peerId) return;
+          if (payload.target !== peerId && payload.target !== 'all') return;
+          if (isMatched && payload.target === 'all') return;
 
           const { sender, signal } = payload;
           const pc = peerConnectionRef.current;
 
-          if (signal.type === 'offer') {
+          if (signal.type === 'ping') {
+            // Received a ping from someone!
+            if (peerId < sender && !isMatched) {
+              isMatched = true;
+              if (pingIntervalRef.current) {
+                clearInterval(pingIntervalRef.current);
+                pingIntervalRef.current = null;
+              }
+              setRemotePeerId(sender);
+              setStatus('connecting');
+              initializeWebRTC(true, sender);
+            }
+          } else if (signal.type === 'offer') {
             isMatched = true;
+            if (pingIntervalRef.current) {
+              clearInterval(pingIntervalRef.current);
+              pingIntervalRef.current = null;
+            }
             setRemotePeerId(sender);
             setStatus('connecting');
             
@@ -165,35 +187,24 @@ export default function VoiceChatModal({ isOpen, onClose }) {
                 signal: answer
               }
             });
-            // Stop advertising presence since we are matched
-            channel.untrack();
           } else if (signal.type === 'answer' && pc) {
             await pc.setRemoteDescription(new RTCSessionDescription(signal));
           } else if (signal.type === 'candidate' && pc) {
             await pc.addIceCandidate(new RTCIceCandidate(signal.candidate));
           }
         })
-        .on('presence', { event: 'sync' }, () => {
-          if (isMatched) return;
-
-          const state = channel.presenceState();
-          const peers = Object.keys(state).filter(id => id !== peerId);
-          
-          if (peers.length > 0) {
-            // Found someone! We will initiate if our ID is lexically smaller to avoid glare
-            const target = peers[0];
-            if (peerId < target && !isMatched) {
-              isMatched = true;
-              setRemotePeerId(target);
-              setStatus('connecting');
-              initializeWebRTC(true, target);
-              channel.untrack(); // Leave matchmaking pool
-            }
-          }
-        })
         .subscribe(async (status) => {
           if (status === 'SUBSCRIBED') {
-            await channel.track({ ready: true });
+            // Start broadcasting our presence via ping
+            pingIntervalRef.current = setInterval(() => {
+              if (!isMatched) {
+                channel.send({
+                  type: 'broadcast',
+                  event: 'webrtc-signal',
+                  payload: { target: 'all', sender: peerId, signal: { type: 'ping' } }
+                });
+              }
+            }, 2000);
           }
         });
 
