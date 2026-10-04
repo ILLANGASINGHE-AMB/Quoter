@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Phone, PhoneOff, Mic, MicOff, Loader2, PhoneForwarded } from 'lucide-react';
 import { supabase } from '../supabaseClient';
+import { sendVoiceWaitingPing } from '../voiceStatus';
 
 // Helper to generate a random peer ID
 const generatePeerId = () => Math.random().toString(36).substring(2, 15);
@@ -18,6 +19,7 @@ export default function VoiceChatModal({ isOpen, onClose }) {
   const channelRef = useRef(null);
   const statusChannelRef = useRef(null);
   const pingIntervalRef = useRef(null);
+  const pendingCandidatesRef = useRef([]);
 
   // Stop everything and reset state
   const handleHangup = () => {
@@ -44,10 +46,7 @@ export default function VoiceChatModal({ isOpen, onClose }) {
       channelRef.current = null;
     }
     
-    if (statusChannelRef.current) {
-      supabase.removeChannel(statusChannelRef.current);
-      statusChannelRef.current = null;
-    }
+    pendingCandidatesRef.current = [];
     
     if (pingIntervalRef.current) {
       clearInterval(pingIntervalRef.current);
@@ -110,7 +109,8 @@ export default function VoiceChatModal({ isOpen, onClose }) {
     };
 
     pc.oniceconnectionstatechange = () => {
-      if (pc.iceConnectionState === 'disconnected' || pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'closed') {
+      console.log('[voice] ICE state:', pc.iceConnectionState);
+      if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'closed') {
         handleHangup();
       }
     };
@@ -147,12 +147,17 @@ export default function VoiceChatModal({ isOpen, onClose }) {
       });
       channelRef.current = channel;
 
-      // Setup status channel for global App.jsx indicator
-      const statusChannel = supabase.channel('voice-status');
-      statusChannelRef.current = statusChannel;
-      await statusChannel.subscribe();
+      // Status pings go through the shared singleton channel (also used by App.jsx)
 
       let isMatched = false;
+
+      const flushCandidates = async (pc) => {
+        const queued = pendingCandidatesRef.current;
+        pendingCandidatesRef.current = [];
+        for (const c of queued) {
+          try { await pc.addIceCandidate(new RTCIceCandidate(c)); } catch (e) { console.warn('[voice] addIceCandidate failed', e); }
+        }
+      };
 
       channel
         .on('broadcast', { event: 'webrtc-signal' }, async ({ payload }) => {
@@ -186,6 +191,7 @@ export default function VoiceChatModal({ isOpen, onClose }) {
             
             const newPc = await initializeWebRTC(false, sender);
             await newPc.setRemoteDescription(new RTCSessionDescription(signal));
+            await flushCandidates(newPc);
             const answer = await newPc.createAnswer();
             await newPc.setLocalDescription(answer);
             
@@ -200,8 +206,14 @@ export default function VoiceChatModal({ isOpen, onClose }) {
             });
           } else if (signal.type === 'answer' && pc) {
             await pc.setRemoteDescription(new RTCSessionDescription(signal));
-          } else if (signal.type === 'candidate' && pc) {
-            await pc.addIceCandidate(new RTCIceCandidate(signal.candidate));
+            await flushCandidates(pc);
+          } else if (signal.type === 'candidate') {
+            const cur = peerConnectionRef.current;
+            if (cur && cur.remoteDescription) {
+              try { await cur.addIceCandidate(new RTCIceCandidate(signal.candidate)); } catch (e) { console.warn('[voice] addIceCandidate failed', e); }
+            } else {
+              pendingCandidatesRef.current.push(signal.candidate);
+            }
           }
         })
         .subscribe(async (status) => {
@@ -216,11 +228,7 @@ export default function VoiceChatModal({ isOpen, onClose }) {
                   payload: { target: 'all', sender: peerId, signal: { type: 'ping' } }
                 });
                 // To global status channel (so App.jsx knows we are waiting)
-                statusChannel.send({
-                  type: 'broadcast',
-                  event: 'ping',
-                  payload: {}
-                });
+                sendVoiceWaitingPing();
               }
             }, 2000);
           }

@@ -9,6 +9,7 @@ import FeedHeader from './components/FeedHeader';
 import FloatingRefreshBtn from './components/FloatingRefreshBtn';
 import EmptyState from './components/EmptyState';
 import VoiceChatModal from './components/VoiceChatModal';
+import { onVoiceWaiting } from './voiceStatus';
 import { User, ExternalLink, Bell, BellRing, Phone } from 'lucide-react';
 import { supabase } from './supabaseClient';
 import logo from './assets/logo.png';
@@ -148,20 +149,18 @@ export default function App() {
       });
 
     // Setup Voice Call Status Listener
-    const statusChannel = supabase.channel('voice-status')
-      .on('broadcast', { event: 'ping' }, () => {
-        setIsCallWaiting(true);
-        if (callWaitingTimeoutRef.current) clearTimeout(callWaitingTimeoutRef.current);
-        callWaitingTimeoutRef.current = setTimeout(() => {
-          setIsCallWaiting(false);
-        }, 4000);
-      })
-      .subscribe();
+    const offVoiceWaiting = onVoiceWaiting(() => {
+      setIsCallWaiting(true);
+      if (callWaitingTimeoutRef.current) clearTimeout(callWaitingTimeoutRef.current);
+      callWaitingTimeoutRef.current = setTimeout(() => {
+        setIsCallWaiting(false);
+      }, 4000);
+    });
 
     return () => {
       supabase.removeChannel(channel);
       supabase.removeChannel(presenceChannel);
-      supabase.removeChannel(statusChannel);
+      offVoiceWaiting();
       if (callWaitingTimeoutRef.current) clearTimeout(callWaitingTimeoutRef.current);
     };
   }, []);
