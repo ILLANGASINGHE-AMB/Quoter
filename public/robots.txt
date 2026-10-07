@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://nirnaama.netlify.app/sitemap.xml
