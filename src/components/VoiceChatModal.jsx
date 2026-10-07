@@ -70,10 +70,13 @@ export default function VoiceChatModal({ isOpen, onClose }) {
   };
 
   const initializeWebRTC = async (isInitiator, targetPeerId) => {
+    console.log('[Voice] Initializing WebRTC, isInitiator:', isInitiator, 'targetPeerId:', targetPeerId);
     const pc = new RTCPeerConnection({
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun.cloudflare.com:3478' }
       ]
     });
     peerConnectionRef.current = pc;
@@ -87,9 +90,27 @@ export default function VoiceChatModal({ isOpen, onClose }) {
 
     // Handle remote stream
     pc.ontrack = (event) => {
-      if (audioRef.current && event.streams[0]) {
-        audioRef.current.srcObject = event.streams[0];
+      console.log('[Voice] Remote track received:', event);
+      if (audioRef.current) {
+        if (event.streams && event.streams[0]) {
+          audioRef.current.srcObject = event.streams[0];
+        } else {
+          const inboundStream = new MediaStream();
+          inboundStream.addTrack(event.track);
+          audioRef.current.srcObject = inboundStream;
+        }
+        audioRef.current.play().catch(e => console.warn('[Voice] autoPlay audio error:', e));
         setStatus('connected');
+      }
+    };
+
+    // Connection state changes
+    pc.onconnectionstatechange = () => {
+      console.log('[Voice] Connection state:', pc.connectionState);
+      if (pc.connectionState === 'connected') {
+        setStatus('connected');
+      } else if (pc.connectionState === 'failed' || pc.connectionState === 'closed') {
+        handleHangup();
       }
     };
 
@@ -109,8 +130,10 @@ export default function VoiceChatModal({ isOpen, onClose }) {
     };
 
     pc.oniceconnectionstatechange = () => {
-      console.log('[voice] ICE state:', pc.iceConnectionState);
-      if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'closed') {
+      console.log('[Voice] ICE state:', pc.iceConnectionState);
+      if (pc.iceConnectionState === 'connected' || pc.iceConnectionState === 'completed') {
+        setStatus('connected');
+      } else if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'closed') {
         handleHangup();
       }
     };
@@ -134,10 +157,11 @@ export default function VoiceChatModal({ isOpen, onClose }) {
 
   const startSearch = async () => {
     try {
-      setStatus('searching');
+      setStatus('requesting_mic');
       // Get mic permission
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       localStreamRef.current = stream;
+      setStatus('searching');
 
       // Setup Supabase Channel for matchmaking and signaling
       const channel = supabase.channel('voice-matchmaking', {
@@ -146,8 +170,6 @@ export default function VoiceChatModal({ isOpen, onClose }) {
         }
       });
       channelRef.current = channel;
-
-      // Status pings go through the shared singleton channel (also used by App.jsx)
 
       let isMatched = false;
 
@@ -161,6 +183,7 @@ export default function VoiceChatModal({ isOpen, onClose }) {
 
       channel
         .on('broadcast', { event: 'webrtc-signal' }, async ({ payload }) => {
+          if (!payload) return;
           // Ignore signals not meant for us
           if (payload.target !== peerId && payload.target !== 'all') return;
           if (isMatched && payload.target === 'all') return;
@@ -169,6 +192,7 @@ export default function VoiceChatModal({ isOpen, onClose }) {
           const pc = peerConnectionRef.current;
 
           if (signal.type === 'ping') {
+            console.log('[Voice] Received ping from:', sender);
             // Received a ping from someone!
             if (peerId < sender && !isMatched) {
               isMatched = true;
@@ -181,6 +205,7 @@ export default function VoiceChatModal({ isOpen, onClose }) {
               initializeWebRTC(true, sender);
             }
           } else if (signal.type === 'offer') {
+            console.log('[Voice] Received offer from:', sender);
             isMatched = true;
             if (pingIntervalRef.current) {
               clearInterval(pingIntervalRef.current);
@@ -205,6 +230,7 @@ export default function VoiceChatModal({ isOpen, onClose }) {
               }
             });
           } else if (signal.type === 'answer' && pc) {
+            console.log('[Voice] Received answer from:', sender);
             await pc.setRemoteDescription(new RTCSessionDescription(signal));
             await flushCandidates(pc);
           } else if (signal.type === 'candidate') {
@@ -216,21 +242,25 @@ export default function VoiceChatModal({ isOpen, onClose }) {
             }
           }
         })
-        .subscribe(async (status) => {
-          if (status === 'SUBSCRIBED') {
-            // Start broadcasting our presence via ping
-            pingIntervalRef.current = setInterval(() => {
+        .subscribe(async (subStatus) => {
+          console.log('[Voice] Channel subscription status:', subStatus);
+          if (subStatus === 'SUBSCRIBED') {
+            const sendPing = () => {
               if (!isMatched) {
-                // To matchmaking channel
                 channel.send({
                   type: 'broadcast',
                   event: 'webrtc-signal',
                   payload: { target: 'all', sender: peerId, signal: { type: 'ping' } }
                 });
-                // To global status channel (so App.jsx knows we are waiting)
                 sendVoiceWaitingPing();
               }
-            }, 2000);
+            };
+
+            // Send immediately upon subscription
+            sendPing();
+
+            // And keep advertising every 1.5 seconds
+            pingIntervalRef.current = setInterval(sendPing, 1500);
           }
         });
 
@@ -251,15 +281,29 @@ export default function VoiceChatModal({ isOpen, onClose }) {
           <h2 className="text-2xl font-serif font-bold text-[#2a2421] mb-2">
             නිර්නාම ඇමතුම්
           </h2>
-          <p className="text-sm text-[#665345] mb-8 text-center px-4">
-            {status === 'idle' && 'අහඹු ලෙස සම්බන්ධ වී කතා කරන්න (Talk anonymously)'}
-            {status === 'searching' && 'මයික්‍රෆෝනයට අවසර දෙන්න... (Allow mic / Searching...)'}
-            {status === 'connecting' && 'සම්බන්ධ වෙමින්...'}
-            {status === 'connected' && 'සම්බන්ධ විය! (Connected!)'}
-          </p>
-
-          <div className="w-24 h-24 rounded-full bg-[#f5eedf] border-2 border-[#b24c32]/30 flex items-center justify-center mb-8 relative">
+          <div className="text-sm text-[#665345] mb-6 text-center px-2 min-h-[44px] flex flex-col items-center justify-center">
+            {status === 'idle' && (
+              <span>අහඹු ලෙස සම්බන්ධ වී කතා කරන්න (Talk anonymously)</span>
+            )}
+            {status === 'requesting_mic' && (
+              <span>මයික්‍රොෆෝනයට අවසර දෙන්න... (Allow mic in browser...)</span>
+            )}
             {status === 'searching' && (
+              <>
+                <span className="font-medium text-[#b24c32]">මයික්‍රෆෝනය සූදානම්! සම්බන්ධ වීමට කෙනෙකු සොයමින්...</span>
+                <span className="text-xs text-[#8c7362] mt-1">Mic active. Waiting for another person to click call...</span>
+              </>
+            )}
+            {status === 'connecting' && (
+              <span className="font-medium text-[#2a2421]">සම්බන්ධ වෙමින් පවතී... (Connecting...)</span>
+            )}
+            {status === 'connected' && (
+              <span className="font-semibold text-green-700">සම්බන්ධ විය! කතා කරන්න (Connected!)</span>
+            )}
+          </div>
+
+          <div className="w-24 h-24 rounded-full bg-[#f5eedf] border-2 border-[#b24c32]/30 flex items-center justify-center mb-6 relative">
+            {(status === 'searching' || status === 'requesting_mic') && (
               <div className="absolute inset-0 rounded-full border-2 border-[#b24c32] animate-ping opacity-75" />
             )}
             {status === 'connected' ? (
@@ -272,6 +316,12 @@ export default function VoiceChatModal({ isOpen, onClose }) {
               <Loader2 className="w-10 h-10 text-[#b24c32] animate-spin" />
             )}
           </div>
+
+          {status === 'searching' && (
+            <div className="bg-[#f5eedf]/70 border border-[#b24c32]/20 rounded-lg p-2.5 mb-6 text-[11px] text-[#665345] text-center leading-relaxed">
+              💡 <strong>අත්හදා බැලීමට (To test):</strong> වෙනත් Tab එකකින් හෝ Phone එකකින් මෙම වෙබ් අඩවිය විවෘත කර ඇමතුමක් ආරම්භ කරන්න.
+            </div>
+          )}
 
           <div className="flex gap-4">
             {status === 'idle' ? (
@@ -313,7 +363,7 @@ export default function VoiceChatModal({ isOpen, onClose }) {
         </button>
       </div>
 
-      <audio ref={audioRef} autoPlay />
+      <audio ref={audioRef} autoPlay playsInline />
     </div>
   );
 }
